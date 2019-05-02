@@ -18,6 +18,21 @@ Write a draft, then make a PR to this repository.
 
 Posts go to ``content/``.  You can use markdown or `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
 
+Tips
+----
+
+- To link to ``/content/xyz.rst``, use the following syntax::
+
+      `A link to xyz <{filename}/xyz.rst>`_
+
+  or in Markdown::
+
+      [A link to xyz]({filename}/xyz.rst)
+
+- For reStructuredText tips, browse to https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html.
+
+- For help with Pelican, browse to https://docs.getpelican.com/en/stable/index.html.
+
 TODOs
 =====
 
