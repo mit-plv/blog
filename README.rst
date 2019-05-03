@@ -16,7 +16,7 @@ Writing new posts
 
 Write a draft, then make a PR to this repository.
 
-Posts go to ``content/``.  You can use markdown or `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_.
+Posts go to ``content/$year-$month-$day-$slug.$ext``; you can use markdown (``ext=md``) or `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ (``ext=rst``).  ``slug`` is the name of the webpage that Pelican will generate.
 
 Tips
 ----

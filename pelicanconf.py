@@ -8,6 +8,7 @@ SITEURL = ''
 SITESUBTITLE = "Updates from Adam Chlipala's PLV group at MIT"
 
 PATH = 'content'
+FILENAME_METADATA = r'(?P<date>\d{4}-\d{2}-\d{2})-(?P<slug>.*)'
 
 TIMEZONE = 'America/New_York'
 
