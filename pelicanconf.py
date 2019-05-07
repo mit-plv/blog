@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 AUTHOR = 'PLV'
 SITENAME = 'PLV@MIT'
 SITEURL = ''
+FEED_DOMAIN = SITEURL
 
 THEME = 'flex-theme'
 
