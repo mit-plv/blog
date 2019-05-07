@@ -1,0 +1,27 @@
+@import "alectryon.css";
+@import url("https://unpkg.com/firacode/distr/fira_code.css");
+
+#content, #featured {
+    overflow: visible; /* don't truncate goal bubbles */
+}
+
+.highlight {
+    background: none;
+}
+
+main article code, main article kbd, main article pre, main article samp {
+    font-family: Fira Code,Source Code Pro,Consolas,Liberation Mono,DejaVu Sans Mono,monospace;
+}
+
+aside nav ul li {
+    text-transform: none;
+}
+
+.highlight .k, .highlight .cs, .highlight .gh,
+.highlight .gp, .highlight .gs, .highlight .gu,
+.highlight .kc, .highlight .kd, .highlight .kn,
+.highlight .kr, .highlight .kt, .highlight .ni,
+.highlight .ne, .highlight .nn, .highlight .nt,
+.highlight .ow, .highlight .se, .highlight .si {
+    font-weight: 500;
+}
