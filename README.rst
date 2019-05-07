@@ -5,6 +5,8 @@
 Local setup
 ===========
 
+Clone this repository recursively to get a copy of `Alectryon <../alectryon>`_ (or use ``git submodule init && git submodule update`` to download it after cloning).
+
 Dependencies:
     ``pip3 install --user pelican==4.0.1 markdown==3.1 docutils==0.14``
     ``pip3 install --user pexpect==4.7.0 pygments==2.3.1 dominate==2.3.5 sexpdata==0.0.3``
