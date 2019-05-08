@@ -23,5 +23,9 @@ aside nav ul li {
 .highlight .kr, .highlight .kt, .highlight .ni,
 .highlight .ne, .highlight .nn, .highlight .nt,
 .highlight .ow, .highlight .se, .highlight .si {
-    font-weight: 500;
+    font-weight: 500; /* Semibold, to not conflict with Alectryon's hover face */
+}
+
+.highlight .kp {
+    font-weight: 500; /* Having just a few keywords not bolded looks messy */
 }
