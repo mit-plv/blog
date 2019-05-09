@@ -1,6 +1,3 @@
-@import "alectryon.css";
-@import url("https://unpkg.com/firacode/distr/fira_code.css");
-
 #content, #featured {
     overflow: visible; /* don't truncate goal bubbles */
 }
@@ -9,8 +6,13 @@
     background: none;
 }
 
-main article code, main article kbd, main article pre, main article samp {
-    font-family: Fira Code,Source Code Pro,Consolas,Liberation Mono,DejaVu Sans Mono,monospace;
+main article code,
+main article kbd,
+main article pre,
+main article samp,
+.alectryon-io {
+    font-family: "Iosevka Slab Web", "Iosevka Web", "Fira Code", "Source Code Pro", "Liberation Mono", "DejaVu Sans Mono", monospace;
+    font-feature-settings: "XV00" 1; /* Use Coq ligatures when Iosevka is available */
 }
 
 aside nav ul li {
