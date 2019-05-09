@@ -15,6 +15,10 @@ main article samp,
     font-feature-settings: "XV00" 1; /* Use Coq ligatures when Iosevka is available */
 }
 
+main article pre {
+    font-size: 1.1rem;
+}
+
 aside nav ul li {
     text-transform: none;
 }
