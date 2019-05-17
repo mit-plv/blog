@@ -71,10 +71,11 @@ EXTRA_PATH_METADATA = {
 ## Alectryon support ##
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))
-from alectryon.externals import docutils_support
 
-docutils_support.register()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "alectryon"))
+import alectryon.docutils
+
+alectryon.docutils.register()
 STATIC_PATHS.append('../alectryon/alectryon.css')
 EXTRA_PATH_METADATA['../alectryon/alectryon.css'] = {'path': 'static/alectryon.css'}
 #######################
