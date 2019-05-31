@@ -15,9 +15,14 @@ PATH = 'content'
 THEME_TEMPLATES_OVERRIDES = ['templates']
 STATIC_PATHS = ['images', 'static']
 CUSTOM_CSS = None # Set using a template override (custom_head.html)
-FILENAME_METADATA = r'(?P<date>\d{4}-\d{2}-\d{2})-(?P<slug>.*)'
+FILENAME_METADATA = r'(?P<date>\d{4}-\d{2}-\d{2})\s*-\s*(?P<slug>.*)'
 
 THEME = 'flex-theme'
+PYGMENTS_STYLE = 'tango_subtle'
+
+EXTRA_PATH_METADATA = {}
+for pth in ("tango_subtle.css", "tango_subtle.min.css"):
+    EXTRA_PATH_METADATA['static/' + pth] = {'path': 'theme/pygments/' + pth}
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -58,14 +63,8 @@ CC_LICENSE = None
 #     'local_icons': True
 # }
 
-PYGMENTS_STYLE = 'emacs'
-
-MENUITEMS = (('PLV (main site)', 'http://plv.csail.mit.edu/'),)
-
-
-EXTRA_PATH_METADATA = {
-    'static/plv.png': {'path': 'theme/img/profile.png'}
-}
+MENUITEMS = (('PLV (main site)', 'http://plv.csail.mit.edu/'), )
+EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 #########################
 
 ## Alectryon support ##
