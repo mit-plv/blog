@@ -68,13 +68,31 @@ EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 #########################
 
 ## Alectryon support ##
-import sys
-import os
-
+import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "alectryon"))
-import alectryon.docutils
 
+import alectryon.pygments
+alectryon.pygments.add_tokens({
+    'tacn-solve': ['maps_neq', 'linear_arithmetic',
+                   'equality', 'model_check_done'],
+    'tacn': [
+        'same_structure', 'inList', 'inductN', 'instantiate_obvious1',
+        'instantiate_obvious', 'instantiate_obviouses', 'induct', "invert'",
+        'invertN', 'invert', 'invert0', 'invert1', 'invert2', "maps_equal'",
+        'fancy_neq', 'removeDups', 'doSubtract', 'simpl_maps', 'simplify',
+        'propositional', 'cases', 'maps_equal', 'first_order', 'sets0', 'sets',
+        'model_check_invert1', 'model_check_invert', 'singletoner', 'closure',
+        'model_check_step0', 'model_check_step', 'model_check_steps1',
+        'model_check_steps', 'model_check_finish', 'model_check_infer',
+        'model_check_find_invariant', 'model_check', 'total_ordering',
+        'maybe_simplify_map', "simplify_map'", 'simplify_map',
+        'excluded_middle', 'dep_cases'
+    ]
+})
+
+import alectryon.docutils
 alectryon.docutils.register()
+
 STATIC_PATHS.append('../alectryon/alectryon.css')
 EXTRA_PATH_METADATA['../alectryon/alectryon.css'] = {'path': 'static/alectryon.css'}
 #######################
