@@ -19,7 +19,7 @@ Writing new posts
 
 Write a draft, then make a PR to this repository.
 
-Posts go to ``content/$year-$month-$day-$slug.$ext``; you can use markdown (``ext=md``) or `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ (``ext=rst``).  ``slug`` is the name of the webpage that Pelican will generate.
+Posts go to ``content/$year-$month-$day - $slug.$ext``; you can use markdown (``$ext=md``) or `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ (``$ext=rst``).  ``$slug`` is the name of the webpage that Pelican will generate.
 
 Here's a basic template for new posts (see `the Pelican docs <https://docs.getpelican.com/en/3.6.3/content.html#articles-and-pages>`_ for more information):
 
@@ -36,6 +36,12 @@ Here's a basic template for new posts (see `the Pelican docs <https://docs.getpe
        :summary: Short summary here.
 
        Article text here.
+
+       .. coq::
+
+          Goal False -> True.
+            intros.
+            exact I.
 
 Tips
 ----
