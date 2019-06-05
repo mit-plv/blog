@@ -25,15 +25,9 @@ aside nav ul li {
     text-transform: none;
 }
 
-.highlight .k, .highlight .cs, .highlight .gh,
-.highlight .gp, .highlight .gs, .highlight .gu,
-.highlight .kc, .highlight .kd, .highlight .kn,
-.highlight .kr, .highlight .kt, .highlight .ni,
-.highlight .ne, .highlight .nn, .highlight .nt,
-.highlight .ow, .highlight .se, .highlight .si {
+.highlight .ch, .highlight .cs, .highlight .gh, .highlight .gs,
+.highlight .gu, .highlight .kc, .highlight .kd, .highlight .kn,
+.highlight .nd, .highlight .nl, .highlight .sc, .highlight .se {
     font-weight: 500; /* Semibold, to not conflict with Alectryon's hover face */
 }
 
-.highlight .kp {
-    font-weight: 500; /* Having just a few keywords not bolded looks messy */
-}
