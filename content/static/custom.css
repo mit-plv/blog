@@ -31,3 +31,42 @@ aside nav ul li {
     font-weight: 500; /* Semibold, to not conflict with Alectryon's hover face */
 }
 
+/* Override  */
+@media screen and (min-width: 768px) {
+    body {
+        align-content: stretch;
+        display: flex;
+    }
+
+    aside {
+        position: static;
+        width: 15rem;
+        min-width: 15rem;
+    }
+
+    main {
+        box-sizing: border-box;
+        flex-grow: 1;
+        height: 100%;
+        margin: 0;
+        overflow: auto;
+        position: static;
+        width: unset;
+    }
+
+    main article {
+        margin: auto;
+        max-width: 80rem;
+        padding: 0 5%;
+    }
+
+    @media (any-hover: hover) and (min-width: 90rem) {
+        article p {
+            width: 55%;
+        }
+
+        article .alectryon-toggle:checked ~ p {
+            width: unset;
+        }
+    }
+}
