@@ -39,34 +39,33 @@ aside nav ul li {
     }
 
     aside {
-        position: static;
         width: 15rem;
-        min-width: 15rem;
     }
 
     main {
         box-sizing: border-box;
-        flex-grow: 1;
         height: 100%;
-        margin: 0;
-        overflow: auto;
-        position: static;
+        left: 15rem;
+        margin: auto;
+        max-width: 80rem;
+        right: 0;
         width: unset;
     }
 
     main article {
         margin: auto;
-        max-width: 80rem;
         padding: 0 5%;
     }
 
+    /* FIXME: This only handles Coq blocks at the top level */
     @media (any-hover: hover) and (min-width: 90rem) {
-        article p {
-            width: 55%;
+        article > header ~ div {
+            padding-right: 45%;
         }
 
-        article .alectryon-toggle:checked ~ p {
-            width: unset;
+        .alectryon-io {
+            /* We do the two-column layout ourselves, so override Alectryon's */
+            width: 100%;
         }
     }
 }
