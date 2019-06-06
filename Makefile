@@ -8,10 +8,10 @@ OUTPUTDIR=$(BASEDIR)/output
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
 
-SSH_HOST=localhost
-SSH_PORT=22
-SSH_USER=root
-SSH_TARGET_DIR=/var/www
+SSH_HOST ?= login.csail.mit.edu
+SSH_PORT ?= 22
+SSH_USER ?= $(shell whoami)
+SSH_TARGET_DIR ?= /var/www
 
 
 DEBUG ?= 0

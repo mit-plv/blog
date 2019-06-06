@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
+import os
 
 AUTHOR = 'PLV'
 SITENAME = 'PLV@MIT'
-SITEURL = ''
+
+# If your site is available via HTTPS, make sure SITEURL begins with https://
+SITEURL = os.getenv('SITE_URL', default='')
 FEED_DOMAIN = SITEURL
 
 LOCALE = ('usa', 'en_US', 'en_US.utf8')
