@@ -11,6 +11,20 @@ body {
     line-height: 1.3;
 }
 
+.topic {
+    border: 8px solid #eeeeec;
+    padding: 0.25em;
+}
+
+.topic p {
+    margin: 0.5em
+}
+
+.topic-title {
+    color: #993333;
+    text-transform: uppercase;
+}
+
 main article code,
 main article kbd,
 main article pre,
