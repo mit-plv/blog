@@ -1,2 +1,5 @@
-__pycache__/
+*.pyc
+/_opam/
+/cache/
 /output/
+__pycache__/
