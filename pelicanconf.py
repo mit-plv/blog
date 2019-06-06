@@ -34,12 +34,13 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
-LINKS = (('Bedrock', 'http://plv.csail.mit.edu/bedrock/'),
-         ('Fiat', 'http://plv.csail.mit.edu/fiat/'),
-         ('Ur/Web', 'http://plv.csail.mit.edu/bedrock/ur/'),
-         ('Kami', 'http://plv.csail.mit.edu/kami/'),)
+LINKS = ()
+#          ('Bedrock', 'http://plv.csail.mit.edu/bedrock/'),
+#          ('Fiat', 'http://plv.csail.mit.edu/fiat/'),
+#          ('Ur/Web', 'http://plv.csail.mit.edu/bedrock/ur/'),
+#          ('Kami', 'http://plv.csail.mit.edu/kami/'),)
 
-SOCIAL = ()
+SOCIAL = ()#(('rss', SITEURL + '/feeds/all.atom.xml'),)
 
 DEFAULT_PAGINATION = 10
 
@@ -66,7 +67,10 @@ CC_LICENSE = None
 #     'local_icons': True
 # }
 
-MENUITEMS = (('PLV (main site)', 'http://plv.csail.mit.edu/'), )
+MENUITEMS = (('PLV (main site)', 'https://plv.csail.mit.edu/'),
+             ('Archives', '/archives.html'),
+             ('Categories', '/categories.html'),
+             ('Tags', '/tags.html'))
 EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 #########################
 
