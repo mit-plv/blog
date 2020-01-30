@@ -10,9 +10,9 @@ Local setup
 Clone this repository recursively (``git clone --recurse-submodules``) to get a copy of `Alectryon <../alectryon>`_ (or use ``git submodule update --init`` to download it after cloning).
 
 Dependencies:
-    | ``opam install coq-serapi=8.9.0+0.6.1``
-    | ``pip3 install --user pelican==4.0.1 markdown==3.1 docutils==0.14``
-    | ``pip3 install --user pygments==2.3.1 dominate==2.3.5``
+    | ``opam install coq-serapi=8.10.0+0.7.0``
+    | ``python3 -m pip install --user pelican==4.2.0 markdown==3.1.1 docutils==0.16``
+    | ``python3 -m pip install --user pygments==2.5.2 dominate==2.4.0``
 Build:
     | ``make devserver`` (this will serve a live-updated copy of the blog at ``http://localhost:8000``)
 
