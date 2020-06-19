@@ -47,6 +47,13 @@ DEFAULT_PAGINATION = 10
 # Document-relative URLs when developing
 RELATIVE_URLS = True
 
+## DOCUTILS config ##
+
+DOCUTILS_SETTINGS = {
+    'halt_level': 3, # Error
+    'warning_stream': None # stderr
+}
+
 ## Flex-theme specific ##
 SITETITLE = SITENAME
 SITESUBTITLE = SITEDESCRIPTION = "Updates from Adam Chlipala's PLV group at MIT"
