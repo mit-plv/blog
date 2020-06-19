@@ -101,5 +101,7 @@ import alectryon.docutils
 alectryon.docutils.register()
 
 STATIC_PATHS.append('../alectryon/alectryon.css')
+STATIC_PATHS.append('../alectryon/alectryon-slideshow.js')
 EXTRA_PATH_METADATA['../alectryon/alectryon.css'] = {'path': 'static/alectryon.css'}
+EXTRA_PATH_METADATA['../alectryon/alectryon-slideshow.js'] = {'path': 'static/alectryon-slideshow.js'}
 #######################
