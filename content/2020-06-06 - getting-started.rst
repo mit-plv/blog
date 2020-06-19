@@ -2,17 +2,17 @@
  Blog demo!
 ============
 
-:tags: demo
-:category: Blog
+:tags: alectryon
+:category: Tools
 :authors: Clément Pit-Claudel
-:summary: Here's a blog demo
+:summary: A tutorial on writing posts with Pelican & Alectryon
 
-This blog is built with `Pelican <https://blog.getpelican.com/>`_.
+This blog is built with `Pelican <https://blog.getpelican.com/>`_ and `Alectryon <https://github.com/cpitclaudel/alectryon>`_.
 
 Local setup
 ===========
 
-Clone the |plv/blog|_ repository recursively (``git clone --recurse-submodules``) to get a copy of `Alectryon <https://github.mit.edu/plv/alectryon>`_ (or use ``git submodule update --init`` to download it after cloning).
+Clone the |plv/blog|_ repository recursively (``git clone --recurse-submodules``) to get a copy of `Alectryon <https://github.com/cpitclaudel/alectryon>`_ (or use ``git submodule update --init`` to download it after cloning).
 
 .. |plv/blog| replace:: ``plv/blog``
 .. _plv/blog: https://github.mit.edu/plv/blog
@@ -27,9 +27,9 @@ Build:
 Writing new posts
 =================
 
-Write a draft, then make a PR to the ``plv/blog`` repository.
+Write a draft, then make a PR to this repository.
 
-Posts go to ``content/$year-$month-$day - $slug.$ext``; you can use `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ (``$ext=rst``) or markdown (``$ext=md``) if you don't need advanced Coq highlighting.  ``$slug`` is the name of the webpage that Pelican will generate.
+Posts go to ``content/$year-$month-$day - $slug.$ext``; you can use `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ (``$ext=rst``) or markdown if you don't need advanced Coq highlighting (``$ext=md``).  Pelican will generate one page per post, named ``$slug.html``.
 
 Here's a basic template for new posts (see `the Pelican docs <https://docs.getpelican.com/en/3.6.3/content.html#articles-and-pages>`_ for more information), which you might put in e.g. ``content/2019-06-02 - short-title.rst``:
 
@@ -39,9 +39,9 @@ Here's a basic template for new posts (see `the Pelican docs <https://docs.getpe
     Post Title
    ============
 
-   :tags: t1; t2
+   :tags: t1, t2
    :category: category-name
-   :authors: author1; author2
+   :authors: author1, author2
    :summary: Short summary here.
 
    Article text here.
@@ -63,7 +63,7 @@ Code in ``.. coq::`` blocks is executed at build time; goals and responses are r
 
    Inductive Even : nat -> Prop :=
    | EvenO : Even O
-   | EvenEven : forall n, Even n -> Even (S (S n)).
+   | EvenS : forall n, Even n -> Even (S (S n)).
 
    Fixpoint even (n : nat) : bool :=
      match n with
@@ -91,12 +91,14 @@ Code in ``.. coq::`` blocks is executed at build time; goals and responses are r
 .. topic:: Interacting with the proof
 
    A small bubble (like this: :alectryon-bubble:`_`) next to a Coq fragment
-   indicate that it produced output: you can either hover, click, or tap on the
+   indicates that it produced output: you can either hover, click, or tap on the
    fragment to show the corresponding goals and messages.
 
    A special ‘*Display all goals and responses*’ checkbox is added at the
    beginning of the document; its position can be adjusted by adding an explicit
    ``.. alectryon-toggle::`` directive.
+
+   The `documentation of Alectryon <https://github.com/cpitclaudel/alectryon#as-a-docutils-or-sphinx-module>`_ has more details.
 
 Here is another example of highlighting:
 
