@@ -6,25 +6,6 @@
     background: none;
 }
 
-body {
-    font-size: 1.1em;
-    line-height: 1.3;
-}
-
-.topic {
-    border: 8px solid #eeeeec;
-    padding: 0.25em;
-}
-
-.topic p {
-    margin: 0.5em
-}
-
-.topic-title {
-    color: #993333;
-    text-transform: uppercase;
-}
-
 main article code,
 main article kbd,
 main article pre,
@@ -36,10 +17,6 @@ main article tt,
     font-size: 0.9em;
 }
 
-aside nav ul li {
-    text-transform: none;
-}
-
 .highlight .ch, .highlight .cs, .highlight .gh, .highlight .gs,
 .highlight .gu, .highlight .kc, .highlight .kd, .highlight .kn,
 .highlight .nd, .highlight .nl, .highlight .sc, .highlight .se {
@@ -48,40 +25,20 @@ aside nav ul li {
 
 /* Override  */
 @media screen and (min-width: 768px) {
-    body {
-        align-content: stretch;
-        display: flex;
-    }
-
-    aside {
-        width: 15rem;
-    }
-
     main {
         box-sizing: border-box;
-        height: 100%;
-        left: 15rem;
-        margin: auto;
-        max-width: 80rem;
-        right: 0;
-        width: unset;
-    }
-
-    main article {
-        margin: auto;
-        padding: 0 5%;
-        text-align: justify;
+        max-width: 100rem;
     }
 
     /* FIXME: This only handles Coq blocks at the top level */
     @media (any-hover: hover) and (min-width: 90rem) {
         article > header ~ div {
-            padding-right: 45%;
-        }
-
-        .alectryon-io {
-            /* We do the two-column layout ourselves, so override Alectryon's */
-            width: 100%;
+            padding-right: 50%;
         }
     }
+}
+
+.alectryon-io .alectryon-target .coq-input {
+    font-weight: bold !important;
+    text-decoration: underline #2e3436 !important;
 }

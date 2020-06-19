@@ -3,4 +3,4 @@
 	url = ../alectryon.git
 [submodule "flex-theme"]
 	path = flex-theme
-	url = https://github.com/alexandrevicenzi/Flex.git
+	url = https://github.com/cpitclaudel/Flex.git
