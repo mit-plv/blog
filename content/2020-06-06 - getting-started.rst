@@ -98,8 +98,6 @@ Code in ``.. coq::`` blocks is executed at build time; goals and responses are r
    beginning of the document; its position can be adjusted by adding an explicit
    ``.. alectryon-toggle::`` directive.
 
-   The `documentation of Alectryon <https://github.com/cpitclaudel/alectryon#as-a-docutils-or-sphinx-module>`_ has more details.
-
 Here is another example of highlighting:
 
 .. coq::
@@ -121,6 +119,52 @@ Here is another example of highlighting:
    Defined.
 
    Eval compute in some_not_none.
+
+Customizing the output
+----------------------
+
+Directive arguments and special comments can be used to customize the display of Coq sessions.  The `documentation of Alectryon <https://github.com/cpitclaudel/alectryon#as-a-docutils-or-sphinx-module>`_ has details, but here are a few examples:
+
+- Run a piece of code silently::
+
+     .. coq:: none
+
+        Require Import Coq.Arith.
+
+   .. coq:: none
+
+      Require Import Coq.Arith.
+
+- Start with all intermediate states shown, hide selectively::
+
+     .. coq:: unfold
+
+        Goal True /\ True.
+          split.
+          - idtac "hello". (* .no-goals *)
+            apply I.
+          - auto.
+        Qed.
+
+  .. coq:: unfold
+
+     Goal True /\ True.
+       split.
+       - idtac "hello". (* .no-goals *)
+         apply I.
+       - auto.
+     Qed.
+
+
+- Show only a message, hiding the input::
+
+     .. coq::
+
+        Compute (1 + 1). (* .unfold .messages *)
+
+  .. coq::
+
+     Compute (1 + 1). (* .unfold .messages *)
 
 Tips
 ====
