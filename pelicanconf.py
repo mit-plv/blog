@@ -106,6 +106,7 @@ alectryon.pygments.add_tokens({
 
 import alectryon.docutils
 alectryon.docutils.register()
+alectryon.docutils.LONG_LINE_THRESHOLD = 64
 
 STATIC_PATHS.append('../alectryon/alectryon.css')
 STATIC_PATHS.append('../alectryon/alectryon-slideshow.js')
