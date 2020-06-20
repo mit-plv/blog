@@ -18,7 +18,7 @@ PATH = 'content'
 THEME_TEMPLATES_OVERRIDES = ['templates']
 STATIC_PATHS = ['images', 'static']
 CUSTOM_CSS = None # Set using a template override (custom_head.html)
-FILENAME_METADATA = r'(?P<date>\d{4}-\d{2}-\d{2})\s*-\s*(?P<slug>.*)'
+FILENAME_METADATA = r'(?P<date>\d{4}-\d{2}-\d{2})_(?P<slug>.*)'
 
 THEME = 'flex-theme'
 PYGMENTS_STYLE = 'tango_subtle'
