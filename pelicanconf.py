@@ -81,7 +81,31 @@ MENUITEMS = (('PLV (main site)', 'https://plv.csail.mit.edu/'),
 EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 #########################
 
+## reST tweaks ##
+
+from docutils import nodes
+from docutils.parsers.rst import roles
+from docutils.writers._html_base import HTMLTranslator
+
+class delnode(nodes.inline):
+    pass
+
+def visit_delnode(self, node):
+    self.body.append(self.starttag(node, 'del', ''))
+def depart_delnode(self, node):
+    self.body.append('</del>')
+
+HTMLTranslator.visit_delnode = visit_delnode
+HTMLTranslator.depart_delnode = depart_delnode
+
+def deleted_role(_role, rawtext, text, _lineno, _inliner, options={}, _content=[]):
+    roles.set_classes(options)
+    return [delnode(rawtext, text, **options)], []
+
+roles.register_canonical_role('del', deleted_role)
+
 ## Alectryon support ##
+
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "alectryon"))
 
