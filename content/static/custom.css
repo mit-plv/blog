@@ -32,7 +32,7 @@ main article tt,
 
     /* FIXME: This only handles Coq blocks at the top level */
     @media (any-hover: hover) and (min-width: 90rem) {
-        article > header ~ div {
+        article > header ~ section {
             padding-right: 50%;
         }
     }

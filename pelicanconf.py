@@ -23,10 +23,6 @@ FILENAME_METADATA = r'(?P<date>\d{4}-\d{2}-\d{2})_(?P<slug>.*)'
 THEME = 'flex-theme'
 PYGMENTS_STYLE = 'tango_subtle'
 
-EXTRA_PATH_METADATA = {}
-for pth in ("tango_subtle.css", "tango_subtle.min.css"):
-    EXTRA_PATH_METADATA['static/' + pth] = {'path': 'theme/pygments/' + pth}
-
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
@@ -78,6 +74,7 @@ MENUITEMS = (('PLV (main site)', 'https://plv.csail.mit.edu/'),
              ('Archives', '/archives.html'),
              ('Categories', '/categories.html'),
              ('Tags', '/tags.html'))
+EXTRA_PATH_METADATA = {}
 EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 #########################
 
@@ -106,10 +103,12 @@ roles.register_canonical_role('del', deleted_role)
 
 ## Alectryon support ##
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "alectryon"))
+import sys
+from os import path
+sys.path.insert(0, path.join(path.dirname(__file__), "alectryon"))
 
 import alectryon.pygments
+
 alectryon.pygments.add_tokens({
     'tacn-solve': ['maps_neq', 'linear_arithmetic',
                    'equality', 'model_check_done'],
@@ -128,12 +127,19 @@ alectryon.pygments.add_tokens({
     ]
 })
 
+import alectryon
 import alectryon.docutils
+from alectryon.html import ASSETS
+
 alectryon.docutils.register()
 alectryon.docutils.LONG_LINE_THRESHOLD = 64
 
-STATIC_PATHS.append('../alectryon/alectryon.css')
-STATIC_PATHS.append('../alectryon/alectryon-slideshow.js')
-EXTRA_PATH_METADATA['../alectryon/alectryon.css'] = {'path': 'static/alectryon.css'}
-EXTRA_PATH_METADATA['../alectryon/alectryon-slideshow.js'] = {'path': 'static/alectryon-slideshow.js'}
+alectryon_assets = path.relpath(ASSETS.PATH, PATH)
+
+STATIC_PATHS.append(alectryon_assets)
+EXTRA_PATH_METADATA[alectryon_assets] = {'path': 'static/alectryon/'}
+
+for pth in ("tango_subtle.css", "tango_subtle.min.css"):
+    rel = path.join(alectryon_assets, pth)
+    EXTRA_PATH_METADATA[rel] = {'path': path.join('theme/pygments/', pth)}
 #######################
