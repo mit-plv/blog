@@ -84,22 +84,24 @@ from docutils import nodes
 from docutils.parsers.rst import roles
 from docutils.writers._html_base import HTMLTranslator
 
-class delnode(nodes.inline):
+class htmlnode(nodes.inline):
     pass
 
-def visit_delnode(self, node):
-    self.body.append(self.starttag(node, 'del', ''))
-def depart_delnode(self, node):
-    self.body.append('</del>')
+def visit_htmlnode(self, node):
+    self.body.append(self.starttag(node, node['tag'], ''))
+def depart_htmlnode(self, node):
+    self.body.append('</{}>'.format(node['tag']))
 
-HTMLTranslator.visit_delnode = visit_delnode
-HTMLTranslator.depart_delnode = depart_delnode
+HTMLTranslator.visit_htmlnode = visit_htmlnode
+HTMLTranslator.depart_htmlnode = depart_htmlnode
 
-def deleted_role(_role, rawtext, text, _lineno, _inliner, options={}, _content=[]):
+def html_role(role, rawtext, text, _lineno, _inliner, options={}, _content=[]):
+    options['tag'] = role
     roles.set_classes(options)
-    return [delnode(rawtext, text, **options)], []
+    return [htmlnode(rawtext, text, **options)], []
 
-roles.register_canonical_role('del', deleted_role)
+roles.register_canonical_role('del', html_role)
+roles.register_canonical_role('kbd', html_role)
 
 ## Alectryon support ##
 
