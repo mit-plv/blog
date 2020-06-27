@@ -17,6 +17,12 @@ main article tt,
     font-size: 0.9em;
 }
 
+.alectryon-io .coq-output {
+    /* Match the padding of pre */
+    left: 0.5rem;
+    right: 0.5rem;
+}
+
 .highlight .ch, .highlight .cs, .highlight .gh, .highlight .gs,
 .highlight .gu, .highlight .kc, .highlight .kd, .highlight .kn,
 .highlight .nd, .highlight .nl, .highlight .sc, .highlight .se {
