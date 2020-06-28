@@ -11,8 +11,8 @@ PUBLISHCONF=$(BASEDIR)/publishconf.py
 SSH_HOST ?= login.csail.mit.edu
 SSH_PORT ?= 22
 SSH_USER ?= $(shell whoami)
-SSH_TARGET_DIR ?= /var/www
-
+SSH_TARGET_DIR ?= ~/public_html/plv-blog-drafts/
+export SITE_URL ?= https://people.csail.mit.edu/$(SSH_USER)/plv-blog-drafts
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)

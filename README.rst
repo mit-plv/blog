@@ -47,6 +47,8 @@ Here's a basic template for new posts (see `the Pelican docs <https://docs.getpe
         intros.
         exact I.
 
+You can render your new post using ``make devserver``; the website will be at http://localhost:8000.  If you want to share the rendered version, you can use ``make rsync_upload``; the default configuration pushes to ``https://people.csail.mit.edu/$(SSH_USER)/plv-blog-drafts`` through ``login.csail.mit.edu``.
+
 Writing Coq proofs
 ==================
 
