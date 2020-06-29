@@ -52,7 +52,7 @@ DOCUTILS_SETTINGS = {
 
 ## Flex-theme specific ##
 SITETITLE = SITENAME
-SITESUBTITLE = SITEDESCRIPTION = "Updates from Adam Chlipala's PLV group at MIT"
+SITESUBTITLE = SITEDESCRIPTION = "Updates from Adam Chlipala's research group & friends of PLV"
 
 BROWSER_COLOR = '#333'
 USE_GOOGLE_FONTS = False
@@ -60,8 +60,8 @@ USE_GOOGLE_FONTS = False
 MAIN_MENU = True
 ROBOTS = 'index, follow'
 
-COPYRIGHT_YEAR = 2019
-COPYRIGHT_NAME = 'PLV @ MIT'
+COPYRIGHT_YEAR = 2020
+COPYRIGHT_NAME = 'PLV & Contributors'
 CC_LICENSE = None
 # {
 #     'name': 'Creative Commons Attribution',
@@ -70,7 +70,7 @@ CC_LICENSE = None
 #     'local_icons': True
 # }
 
-MENUITEMS = (('PLV (main site)', 'https://plv.csail.mit.edu/'),
+MENUITEMS = (('PLV @ CSAIL', 'https://www.csail.mit.edu/research/programming-languages-verification'),
              ('Archives', '/archives.html'),
              ('Categories', '/categories.html'),
              ('Tags', '/tags.html'))

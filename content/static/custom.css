@@ -30,17 +30,19 @@ main article tt,
 }
 
 /* Override  */
-@media screen and (min-width: 768px) {
+main {
+    box-sizing: border-box;
+    max-width: 50rem;
+}
+
+/* FIXME: This only handles Coq blocks at the top level */
+@media (any-hover: hover) and (min-width: 80rem) {
     main {
-        box-sizing: border-box;
         max-width: 100rem;
     }
 
-    /* FIXME: This only handles Coq blocks at the top level */
-    @media (any-hover: hover) and (min-width: 90rem) {
-        article > header ~ section {
-            padding-right: 50%;
-        }
+    article > header ~ section {
+        padding-right: 50%;
     }
 }
 
