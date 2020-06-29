@@ -71,9 +71,9 @@ CC_LICENSE = None
 # }
 
 MENUITEMS = (('PLV @ CSAIL', 'https://www.csail.mit.edu/research/programming-languages-verification'),
-             ('Archives', '/archives.html'),
-             ('Categories', '/categories.html'),
-             ('Tags', '/tags.html'))
+             ('Archives', SITEURL + '/archives.html'),
+             ('Categories', SITEURL + '/categories.html'),
+             ('Tags', SITEURL + '/tags.html'))
 EXTRA_PATH_METADATA = {}
 EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 #########################
