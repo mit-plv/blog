@@ -35,7 +35,6 @@ main {
     max-width: 50rem;
 }
 
-/* FIXME: This only handles Coq blocks at the top level */
 @media (any-hover: hover) and (min-width: 80rem) {
     main {
         max-width: 100rem;
