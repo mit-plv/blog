@@ -45,6 +45,12 @@ main {
     }
 }
 
+.alectryon-io .coq-goal,
+.alectryon-io .coq-response {
+    font-weight: normal;
+    font-size: inherit;
+}
+
 .alectryon-io .alectryon-target .coq-input {
     font-weight: bold !important;
     text-decoration: underline #2e3436 !important;
