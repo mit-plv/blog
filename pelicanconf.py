@@ -69,12 +69,6 @@ ROBOTS = 'index, follow'
 COPYRIGHT_YEAR = 2020
 COPYRIGHT_NAME = 'PLV & Contributors'
 CC_LICENSE = None
-# {
-#     'name': 'Creative Commons Attribution',
-#     'version': '4.0',
-#     'slug': 'by',
-#     'local_icons': True
-# }
 
 MENUITEMS = (('PLV @ CSAIL', 'https://www.csail.mit.edu/research/programming-languages-verification'),
              ('Archives', SITEURL + '/archives.html'),
