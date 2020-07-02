@@ -133,7 +133,9 @@ class PreviewDirective(Directive):
 
 directives.register_directive('preview', PreviewDirective)
 
-from pelican.readers import RstReader, render_node_to_html
+from docutils.writers.html5_polyglot import HTMLTranslator, Writer
+from pelican.readers import RstReader, PelicanHTMLTranslator, PelicanHTMLWriter, render_node_to_html
+
 class PreviewAbleRstReader(RstReader):
     def read(self, source_path):
         """Parses restructured text"""
@@ -155,6 +157,10 @@ class PreviewAbleRstReader(RstReader):
 
 READERS = {ext: PreviewAbleRstReader
            for ext in RstReader.file_extensions}
+
+# Use the HTML5 writer
+PelicanHTMLWriter.__bases__ = (Writer,)
+PelicanHTMLTranslator.__bases__ = (HTMLTranslator,)
 
 # Alectryon setup
 # ---------------
