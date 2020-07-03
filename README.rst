@@ -39,7 +39,11 @@ Here's a basic template for new posts (see `the Pelican docs <https://docs.getpe
    :authors: author1, author2
    :summary: Short summary here.
 
-   Article text here.
+   .. preview::
+
+      First few paragraphs, which will appear on the front page.
+
+   More text.
 
    .. coq::
 
