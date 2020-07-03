@@ -85,18 +85,9 @@ EXTRA_PATH_METADATA['static/plv.png'] = {'path': 'theme/img/profile.png'}
 
 from docutils import nodes
 from docutils.parsers.rst import roles, directives, Directive
-from docutils.writers._html_base import HTMLTranslator
 
 class htmlnode(nodes.inline):
     pass
-
-def visit_htmlnode(self, node):
-    self.body.append(self.starttag(node, node['tag'], ''))
-def depart_htmlnode(self, node):
-    self.body.append('</{}>'.format(node['tag']))
-
-HTMLTranslator.visit_htmlnode = visit_htmlnode
-HTMLTranslator.depart_htmlnode = depart_htmlnode
 
 def html_role(role, rawtext, text, _lineno, _inliner, options={}, _content=[]):
     options['tag'] = role
@@ -112,14 +103,6 @@ roles.register_canonical_role('kbd', html_role)
 class preview(nodes.container):
     pass
 
-def visit_preview(self, _node):
-    pass
-def depart_preview(self, _node):
-    pass
-
-HTMLTranslator.visit_preview = visit_preview
-HTMLTranslator.depart_preview = depart_preview
-
 class PreviewDirective(Directive):
     required_arguments = 0
     optional_arguments = 0
@@ -134,7 +117,7 @@ class PreviewDirective(Directive):
 directives.register_directive('preview', PreviewDirective)
 
 from docutils.writers.html5_polyglot import HTMLTranslator, Writer
-from pelican.readers import RstReader, PelicanHTMLTranslator, PelicanHTMLWriter, render_node_to_html
+from pelican.readers import RstReader, _FieldBodyTranslator, PelicanHTMLTranslator, PelicanHTMLWriter, render_node_to_html
 
 class PreviewAbleRstReader(RstReader):
     def read(self, source_path):
@@ -158,9 +141,29 @@ class PreviewAbleRstReader(RstReader):
 READERS = {ext: PreviewAbleRstReader
            for ext in RstReader.file_extensions}
 
+# Custom translator
+# -----------------
+
+class CustomHTMLTranslator(HTMLTranslator):
+    def visit_literal(self, node):
+        # Force the translator to use a <code> tag
+        node.setdefault('classes', []).append('code')
+        super().visit_literal(node)
+
+    def visit_htmlnode(self, node):
+        self.body.append(self.starttag(node, node['tag'], ''))
+    def depart_htmlnode(self, node):
+        self.body.append('</{}>'.format(node['tag']))
+
+    def visit_preview(self, _node):
+        pass
+    def depart_preview(self, _node):
+        pass
+
 # Use the HTML5 writer
 PelicanHTMLWriter.__bases__ = (Writer,)
-PelicanHTMLTranslator.__bases__ = (HTMLTranslator,)
+PelicanHTMLTranslator.__bases__ = (CustomHTMLTranslator,)
+_FieldBodyTranslator.__bases__ = (CustomHTMLTranslator,)
 
 # Alectryon setup
 # ---------------
