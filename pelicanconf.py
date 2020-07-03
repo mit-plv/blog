@@ -196,7 +196,7 @@ import alectryon
 import alectryon.docutils
 from alectryon.html import ASSETS
 
-alectryon.docutils.register()
+alectryon.docutils.setup()
 alectryon.docutils.LONG_LINE_THRESHOLD = 64
 
 alectryon_assets = path.relpath(ASSETS.PATH, PATH)
