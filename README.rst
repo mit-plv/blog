@@ -18,6 +18,8 @@ Dependencies:
     | ``python3 -m pip install --user pygments==2.5.2 dominate==2.4.0``
 Build:
     | ``make devserver`` (this will serve a live-updated copy of the blog at ``http://localhost:8000``)
+    | ``make rsync_deploy`` (this will upload the updated website to plv.csail.mit.edu)
+
 
 Writing new posts
 =================

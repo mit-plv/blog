@@ -8,11 +8,19 @@ OUTPUTDIR=$(BASEDIR)/output
 CONFFILE=$(BASEDIR)/pelicanconf.py
 PUBLISHCONF=$(BASEDIR)/publishconf.py
 
+# Default config: upload to plv-blog-drafts of current user
 SSH_HOST ?= login.csail.mit.edu
 SSH_PORT ?= 22
 SSH_USER ?= $(shell whoami)
 SSH_TARGET_DIR ?= ~/public_html/plv-blog-drafts/
 export SITE_URL ?= https://people.csail.mit.edu/$(SSH_USER)/plv-blog-drafts
+
+# Deployment configuration
+deploy_conf := \
+	SSH_USER=ubuntu \
+	SSH_HOST=plv.csail.mit.edu \
+	SSH_TARGET_DIR=/var/www/html/blog/ \
+	SITE_URL=https://plv.csail.mit.edu/blog \
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
@@ -35,8 +43,10 @@ help:
 	@echo '   make serve [PORT=8000]              serve site at http://localhost:8000'
 	@echo '   make serve-global [SERVER=0.0.0.0]  serve (as root) to $(SERVER):80    '
 	@echo '   make devserver [PORT=8000]          serve and regenerate together      '
-	@echo '   make ssh_upload                     upload the web site via SSH        '
-	@echo '   make rsync_upload                   upload the web site via rsync+ssh  '
+	@echo '   make ssh_upload                     upload drafts via SSH              '
+	@echo '   make rsync_upload                   upload drafts via rsync+ssh        '
+	@echo '   make ssh_deploy                     deploy to PLV via SSH              '
+	@echo '   make rsync_deploy                   deploy to PLV via rsync+ssh        '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -80,7 +90,12 @@ ssh_upload: publish
 	scp -P $(SSH_PORT) -r $(OUTPUTDIR)/* $(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)
 
 rsync_upload: publish
-	rsync -e "ssh -p $(SSH_PORT)" -P -rvzc --cvs-exclude --delete $(OUTPUTDIR)/ $(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)
+	rsync -e "ssh -p $(SSH_PORT)" -P -rvzc --cvs-exclude $(OUTPUTDIR)/ $(SSH_USER)@$(SSH_HOST):$(SSH_TARGET_DIR)
 
+ssh_deploy:
+	+$(MAKE) $(deploy_conf) ssh_upload
 
-.PHONY: html help clean regenerate serve serve-global devserver stopserver publish ssh_upload rsync_upload
+rsync_deploy:
+	+$(MAKE) $(deploy_conf) rsync_upload
+
+.PHONY: html help clean regenerate serve serve-global devserver stopserver publish ssh_upload rsync_upload deploy
