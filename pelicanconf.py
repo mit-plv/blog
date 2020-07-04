@@ -33,6 +33,8 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
+GITHUB_PROJECT = "mit-plv/blog"
+
 LINKS = ()
 #          ('Bedrock', 'http://plv.csail.mit.edu/bedrock/'),
 #          ('Fiat', 'http://plv.csail.mit.edu/fiat/'),
