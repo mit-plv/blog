@@ -55,6 +55,8 @@ Here's a basic template for new posts (see `the Pelican docs <https://docs.getpe
 
 You can render your new post using ``make devserver``; the website will be at http://localhost:8000.  If you want to share the rendered version, you can use ``make rsync_upload``; the default configuration pushes to ``https://people.csail.mit.edu/$(SSH_USER)/plv-blog-drafts`` through ``login.csail.mit.edu``.
 
+Rendering your new post will create a ``.cache`` file along your ``.rst`` file.  If your post requires a complex set-up, like external libraries, it's best to include the ``.cache`` file in your pull request.
+
 Writing Coq proofs
 ==================
 
