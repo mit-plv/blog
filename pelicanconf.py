@@ -48,6 +48,12 @@ DEFAULT_PAGINATION = 10
 # Document-relative URLs when developing
 RELATIVE_URLS = True
 
+# FIXME
+# CACHE_CONTENT = True
+# CONTENT_CACHING_LAYER = 'reader'
+# CONTENT_CACHING_LAYER = 'generator'
+# WITH_FUTURE_DATES = False
+
 # Docutils settings
 # =================
 
@@ -200,6 +206,7 @@ from alectryon.html import ASSETS
 
 alectryon.docutils.setup()
 alectryon.docutils.LONG_LINE_THRESHOLD = 64
+alectryon.docutils.CACHE_DIRECTORY = "content"
 
 alectryon_assets = path.relpath(ASSETS.PATH, PATH)
 
