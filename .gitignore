@@ -1,4 +1,5 @@
 *.pyc
+.lia.cache
 /_opam/
 /cache/
 /output/
