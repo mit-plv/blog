@@ -14,6 +14,8 @@
 :authors: Tej Chajed
 :summary: Introduction to concurrency reasoning in the Iris framework, using a
           bank as an example program.
+:alectryon/pygments/tacn: iIntros iApply iDestruct iExists
+                          iSplit iSplitL iSplitR
 
 .. preview::
 
