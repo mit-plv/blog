@@ -2,7 +2,7 @@
  PLV@MIT
 =========
 
-The PLV blog, built with `Pelican <https://blog.getpelican.com/>`_ and `Alectryon <https://github.com/cpitclaudel/alectryon>`_.  See `the tutorial blogpost <content/2019-06-06 - getting-started.rst>`_ for details about Alectryon.
+The PLV blog, built with `Pelican <https://blog.getpelican.com/>`_ and `Alectryon <https://github.com/cpitclaudel/alectryon>`_.  See `the tutorial blogpost <https://plv.csail.mit.edu/blog/drafts/alectryon.html>`_ for details about Alectryon.
 
 Local setup
 ===========
