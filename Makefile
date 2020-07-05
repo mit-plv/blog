@@ -1,5 +1,5 @@
 PY?=python3
-PELICAN?=pelican
+PELICAN?=eval $$(opam env) && pelican
 PELICANOPTS=
 
 BASEDIR=$(CURDIR)
