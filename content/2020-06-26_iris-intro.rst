@@ -160,8 +160,8 @@ desired invariant.
         let: "b_bal" := ref #0 in
         let: "lk_a" := newlock #() in
         let: "lk_b" := newlock #() in
-       (* the bank is represented as a pair of accounts, each of which
-       is a pair of a lock and a pointer to its balance *)
+       (* the bank is represented as a pair of accounts, each of
+       which is a pair of a lock and a pointer to its balance *)
         (("lk_a", "a_bal"), ("lk_b", "b_bal")).
 
 `transfer` moves money from the first to the second account (there's no check
@@ -480,7 +480,7 @@ An account is a pair of a lock and an account protected by the lock, where
    Definition is_account (acct: val) γ : iProp Σ :=
      ∃ (bal_ref: loc) lk,
        ⌜acct = (lk, #bal_ref)%V⌝ ∗
-       (* you can ignore this ghost name associated with the lock *)
+       (* you can ignore this ghost name for the lock *)
        ∃ (γl: gname), is_lock γl lk (account_inv γ bal_ref).
 
 `bank_inv` is an invariant (the usual one that holds at all intermediate points,
@@ -593,11 +593,13 @@ the auth `"Hγ1"` created above.
 
 .. coq::
 
-     wp_apply (newlock_spec (account_inv γ1 a_ref) with "[Ha Hγ1]").
+     wp_apply (newlock_spec (account_inv γ1 a_ref)
+                 with "[Ha Hγ1]").
      { iExists _; iFrame. }
      iIntros (lk_a γlk1) "Hlk1".
      iMod (ghost_var_alloc (0: ZO)) as (γ2) "(Hown2&Hγ2)".
-     wp_apply (newlock_spec (account_inv γ2 b_ref) with "[Hb Hγ2]").
+     wp_apply (newlock_spec (account_inv γ2 b_ref)
+                 with "[Hb Hγ2]").
      { iExists _; iFrame. }
      iIntros (lk_b γlk2) "Hlk2". (* .unfold *)
 
@@ -649,9 +651,9 @@ caller will never lose this fact.
      {{{ RET #(); True }}}.
    Proof.
      iIntros (Φ) "#Hb HΦ".
-     (* Breaking apart the above definitions is really quite painful.
-     I have written better infrastructure for this but it isn't
-     upstream in Iris (yet!) *)
+     (* Breaking apart the above definitions is really quite
+     painful. I have written better infrastructure for this but it
+     isn't upstream in Iris (yet!) *)
      iDestruct "Hb" as (acct1 acct2 γ ->) "(Hacct1&Hacct2&Hinv)".
      iDestruct "Hacct1" as (bal_ref1 lk1 ->) "Hlk".
      iDestruct "Hlk" as (γl1) "Hlk1".
@@ -697,16 +699,18 @@ name chosen for the bank invariant.
 
    rewrite -fupd_wp. (* we need to do this for iInv to work *)
    iInv "Hinv" as (bal1' bal2') ">(Hγ1&Hγ2&%)". (* .unfold *)
-   (* we use the agreement and update theorems above for these ghost
-   variables *)
+   (* we use the agreement and update theorems above for these
+   ghost variables *)
    iDestruct (ghost_var_agree with "Hγ1 [$]") as %->.
    iDestruct (ghost_var_agree with "Hγ2 [$]") as %->.
-   iMod (ghost_var_update (bal1-amt) with "Hγ1 Hown1") as "(Hγ1&Hown1)".
-   iMod (ghost_var_update (bal2+amt) with "Hγ2 Hown2") as "(Hγ2&Hown2)".
+   iMod (ghost_var_update (bal1-amt)
+           with "Hγ1 Hown1") as "(Hγ1&Hown1)".
+   iMod (ghost_var_update (bal2+amt)
+           with "Hγ2 Hown2") as "(Hγ2&Hown2)".
    iModIntro.
-   (* we can't just modify ghost state however we want - to continue,
-   `iInv` added `bank_inv` to our goal to prove, requiring us to restore
-   the invariant *)
+   (* we can't just modify ghost state however we want - to
+   continue, `iInv` added `bank_inv` to our goal to prove,
+   requiring us to restore the invariant *)
    iSplitL "Hγ1 Hγ2".
    { iNext. iExists _, _; iFrame.
      iPureIntro.
@@ -745,8 +749,8 @@ above, and simpler because it doesn't modify any state.
         check_consistency b
      {{{ RET #true; True }}}.
    Proof.
-     (* most of this proof is the same: open everything up and acquire
-     the locks, then destruct the lock invariants *)
+     (* most of this proof is the same: open everything up and
+     acquire the locks, then destruct the lock invariants *)
      iIntros (Φ) "#Hb HΦ".
      iDestruct "Hb" as (acct1 acct2 γ ->) "(Hacct1&Hacct2&Hinv)".
      iDestruct "Hacct1" as (bal_ref1 lk1 ->) "Hlk".
@@ -767,9 +771,10 @@ above, and simpler because it doesn't modify any state.
      wp_pures; wp_load.
      wp_pures.
 
-     (* Now we need to prove something about our return value using information
-     derived from the invariant. As before we'll open the invariant, but this time
-     we don't need to modify anything, just extract a pure fact. *)
+     (* Now we need to prove something about our return value using
+     information derived from the invariant. As before we'll open
+     the invariant, but this time we don't need to modify anything,
+     just extract a pure fact. *)
      rewrite -fupd_wp.
      (* the [%] here is the pure fact, actually *)
      iInv N as (bal1' bal2') ">(Hγ1 & Hγ2 & %)".
@@ -789,8 +794,8 @@ above, and simpler because it doesn't modify any state.
      { iExists _; iFrame. }
      iIntros "_".
      wp_pures. (* .unfold *)
-     (* the calculation always returns true because of the H hypothesis we got
-     from the invariant *)
+     (* the calculation always returns true because of the H
+     hypothesis we got from the invariant *)
      rewrite bool_decide_eq_true_2; last congruence.
      by iApply "HΦ".
    Qed.
@@ -816,9 +821,9 @@ here.
      wp_rec.
      wp_apply wp_new_bank; first auto.
      (* we use `#Hb` to put the newly created `is_bank` in the
-     "persistent context" in the Iris Proof Mode - these are persistent
-     facts and thus are available even when we need to split to prove a
-     separating conjunction *)
+     "persistent context" in the Iris Proof Mode - these are
+     persistent facts and thus are available even when we need to
+     split to prove a separating conjunction *)
      iIntros (b) "#Hb". (* .unfold *)
 
 The proof is easy now - the fork rule requires us to split the context and
@@ -831,7 +836,8 @@ proven a triple for it with a postcondition of `True`.
      wp_apply wp_fork.
      - wp_apply (wp_transfer with "Hb").
        auto.
-     - (* `check_consistency` always returns true, using `is_bank` *)
+     - (* `check_consistency` always returns true, assuming
+       `is_bank` *)
        wp_apply (wp_check_consistency with "Hb").
        iIntros "_".
        by iApply "HΦ".
