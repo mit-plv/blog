@@ -2,6 +2,13 @@
  A brief introduction to Iris
 ==============================
 
+..
+   This is the source for a blog post written in literate programming style. If
+   you want to read the post, it is best viewed at
+   https://plv.csail.mit.edu/blog/iris-intro.html, which formats the text and
+   displays proof goals where useful for the exposition. This source code is
+   intended for standalone compilation, or if you want to make modifications.
+
 :tags: iris, concurrency, guest-post
 :category: tutorial
 :authors: Tej Chajed
