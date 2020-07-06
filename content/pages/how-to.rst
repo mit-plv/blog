@@ -106,6 +106,6 @@ Clicking on a sentence will inline Coq's output and make it persistently visible
        reflexivity.
    Qed.
 
-One final way to interact with the proofs is using the keyboard, in a style similar to Proof General or CoqIDE.  Try pressing :kbd:`Ctrl+↓` and :kbd:`Ctrl+↑`; you will be taken back to the beginning of this article and shown goals and responses at each step.  You can also click on a sentence while holding :kbd:`Ctrl` to focus on a given goal.
+One final way to interact with the proofs is using the keyboard, in a style similar to Proof General or CoqIDE.  Try pressing :kbd:`Ctrl+↓` and :kbd:`Ctrl+↑`; you will be taken back to the beginning of this article and shown goals and responses at each step.  You can also click on a sentence while holding :kbd:`Ctrl` (or :kbd:`Cmd` on macOS) to focus on a given goal.
 
 I plan to write about the system that powers this blog in the future.  For now, happy hacking!
