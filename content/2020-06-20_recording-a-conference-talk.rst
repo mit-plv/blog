@@ -9,7 +9,7 @@
 
 .. preview::
 
-   Most PL conferences moved online this year, and many are asking authors to pre-record talks to avoid livestreaming difficulties.  Here are the steps we followed to record and edit our `Kôika talk <https://youtu.be/e0A2Qh3eQn8?t=6913>`_ at PLDI 2020.  This posts covers preparing and recording the talk, adding the slides, and captioning the final video.
+   Most PL conferences moved online this year, and many are asking authors to pre-record talks to avoid livestreaming difficulties.  Here are the steps we followed to record and edit our `Kôika talk <https://www.youtube.com/watch?v=5W9v-n-EZuo>`_ at PLDI 2020 and our `extraction talk <https://youtu.be/CQHoQRBD5Xk?t=3738>`_ at IJCAR 2020.  This posts covers preparing and recording the talk, adding the slides, and captioning the final video.
 
 Many people at PLDI swore by `OBS studio <https://obsproject.com/>`_, though, so you should check that out too.  My colleague Jason Gross also points out that Zoom has an `automatic captioning feature <https://support.zoom.us/hc/en-us/articles/115004794983-Automatically-Transcribe-Cloud-Recordings->`_ for paid plans, so if you're confident recording everything at once and you have Zoom you can create a private room and use that feature.
 
