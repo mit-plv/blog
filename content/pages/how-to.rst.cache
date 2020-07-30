@@ -1,1 +1,1327 @@
-{"metadata":{"serapi_args":[]},"chunks":["Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).\n\nFixpoint even (n: nat): bool :=\n  match n with\n  | 0 => true\n  | 1 => false\n  | S (S n) => even n\n  end.","Fixpoint even_Even_fp (n: nat):\n  even n = true <-> Even n.\nProof.\n  destruct n as [ | [ | n ] ].\n  all: cbn.\n  - (* n \u2190 0 *)\n    split; intros.\n    all: constructor.\n  - (* n \u2190 1 *)\n    split.\n    all: inversion 1.\n  - (* n \u2190 S (S _) *)\n    split.\n    all: (constructor || inversion 1).\n    all: apply even_Even_fp.\n    all: assumption.\nQed.","Require Import Coq.Strings.String Coq.Arith.Arith\n        Coq.setoid_ring.ArithRing Coq.Bool.Bool.\nOpen Scope string_scope.\n\nDefinition rot13c c :=\n  let n := Ascii.nat_of_ascii c in\n  let n' :=\n    if (65 <=? n) && (n <=? 90) then\n      65 + (n - 65 + 13) mod 26\n    else if (97 <=? n) && (n <=? 122) then\n      97 + (n - 97 + 13) mod 26\n    else\n      n in\n  Ascii.ascii_of_nat n'.\n\nFixpoint rot13 msg :=\n  match msg with\n  | EmptyString => EmptyString\n  | String c s => String (rot13c c) (rot13 s)\n  end.","Compute (rot13 \"Uryyb, jbeyq!\").\nSearch (_ + _ = _ -> _ = _).","Fixpoint sum upto :=\n  match upto with\n  | O => 0\n  | S upto' => upto + sum upto'\n  end.","Lemma Gauss:\n  forall n, 2 * (sum n) = n * (n + 1).\nProof.\n  intros.\n  induction n.\n  - (* n \u2190 0 *) reflexivity.\n  - (* n \u2190 S _ *)\n    cbn [sum].\n    rewrite Mult.mult_plus_distr_l.\n    rewrite IHn.\n    change (S n) with (1 + n).\n    rewrite !Mult.mult_plus_distr_l, !Mult.mult_plus_distr_r.\n    cbn [Nat.mul]; rewrite !Nat.mul_1_r, !Nat.add_0_r.\n    rewrite !Nat.add_assoc.\n    change (1 + 1) with 2.\n    rewrite !(Nat.add_comm _ 1), !Nat.add_assoc.\n    change (1 + 1) with 2.\n    Show Existentials. (* .no-goals *)\n    reflexivity.\nQed."],"annotated":[[{"_type":"sentence","contents":"Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).","responses":[],"goals":[]},{"_type":"text","contents":"\n\n"},{"_type":"sentence","contents":"Fixpoint even (n: nat): bool :=\n  match n with\n  | 0 => true\n  | 1 => false\n  | S (S n) => even n\n  end.","responses":[],"goals":[]}],[{"_type":"sentence","contents":"Fixpoint even_Even_fp (n: nat):\n  even n = true <-> Even n.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"even n = true <-> Even n","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":"\n"},{"_type":"sentence","contents":"Proof.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"even n = true <-> Even n","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"destruct n as [ | [ | n ] ].","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"even 0 = true <-> Even 0","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]},{"_type":"goal","name":null,"conclusion":"even 1 = true <-> Even 1","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]},{"_type":"goal","name":null,"conclusion":"even (S (S n)) = true <-> Even (S (S n))","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"all: cbn.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"true = true <-> Even 0","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]},{"_type":"goal","name":null,"conclusion":"false = true <-> Even 1","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]},{"_type":"goal","name":null,"conclusion":"even n = true <-> Even (S (S n))","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"-","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"true = true <-> Even 0","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]}]},{"_type":"text","contents":" (* n \u2190 0 *)\n    "},{"_type":"sentence","contents":"split; intros.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"Even 0","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"},{"_type":"hypothesis","names":["H"],"body":null,"type":"true = true"}]},{"_type":"goal","name":null,"conclusion":"true = true","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"},{"_type":"hypothesis","names":["H"],"body":null,"type":"Even 0"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"all: constructor.","responses":[],"goals":[]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"-","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"false = true <-> Even 1","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]}]},{"_type":"text","contents":" (* n \u2190 1 *)\n    "},{"_type":"sentence","contents":"split.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"false = true -> Even 1","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]},{"_type":"goal","name":null,"conclusion":"Even 1 -> false = true","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n : nat,\neven n = true <-> Even n"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"all: inversion 1.","responses":[],"goals":[]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"-","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"even n = true <-> Even (S (S n))","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":" (* n \u2190 S (S _) *)\n    "},{"_type":"sentence","contents":"split.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"even n = true -> Even (S (S n))","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]},{"_type":"goal","name":null,"conclusion":"Even (S (S n)) -> even n = true","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"all: (constructor || inversion 1).","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"Even n","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["H"],"body":null,"type":"even n = true"}]},{"_type":"goal","name":null,"conclusion":"even n = true","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n1 : nat,\neven n1 = true <-> Even n1"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["H"],"body":null,"type":"Even (S (S n))"},{"_type":"hypothesis","names":["n0"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["H1"],"body":null,"type":"Even n"},{"_type":"hypothesis","names":["H0"],"body":null,"type":"n0 = n"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"all: apply even_Even_fp.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"even n = true","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n0 : nat,\neven n0 = true <-> Even n0"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["H"],"body":null,"type":"even n = true"}]},{"_type":"goal","name":null,"conclusion":"Even n","hypotheses":[{"_type":"hypothesis","names":["even_Even_fp"],"body":null,"type":"forall n1 : nat,\neven n1 = true <-> Even n1"},{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["H"],"body":null,"type":"Even (S (S n))"},{"_type":"hypothesis","names":["n0"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["H1"],"body":null,"type":"Even n"},{"_type":"hypothesis","names":["H0"],"body":null,"type":"n0 = n"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"all: assumption.","responses":[],"goals":[]},{"_type":"text","contents":"\n"},{"_type":"sentence","contents":"Qed.","responses":[],"goals":[]}],[{"_type":"sentence","contents":"Require Import Coq.Strings.String Coq.Arith.Arith\n        Coq.setoid_ring.ArithRing Coq.Bool.Bool.","responses":[],"goals":[]},{"_type":"text","contents":"\n"},{"_type":"sentence","contents":"Open Scope string_scope.","responses":[],"goals":[]},{"_type":"text","contents":"\n\n"},{"_type":"sentence","contents":"Definition rot13c c :=\n  let n := Ascii.nat_of_ascii c in\n  let n' :=\n    if (65 <=? n) && (n <=? 90) then\n      65 + (n - 65 + 13) mod 26\n    else if (97 <=? n) && (n <=? 122) then\n      97 + (n - 97 + 13) mod 26\n    else\n      n in\n  Ascii.ascii_of_nat n'.","responses":[],"goals":[]},{"_type":"text","contents":"\n\n"},{"_type":"sentence","contents":"Fixpoint rot13 msg :=\n  match msg with\n  | EmptyString => EmptyString\n  | String c s => String (rot13c c) (rot13 s)\n  end.","responses":[],"goals":[]}],[{"_type":"sentence","contents":"Compute (rot13 \"Uryyb, jbeyq!\").","responses":["     = \"Hello, world!\"\n     : string"],"goals":[]},{"_type":"text","contents":"\n"},{"_type":"sentence","contents":"Search (_ + _ = _ -> _ = _).","responses":["plus_reg_l: forall n m p : nat, p + n = p + m -> n = m","Nat.add_sub_eq_r:\n  forall n m p : nat, m + p = n -> n - p = m","Nat.add_sub_eq_l:\n  forall n m p : nat, m + p = n -> n - m = p"],"goals":[]}],[{"_type":"sentence","contents":"Fixpoint sum upto :=\n  match upto with\n  | O => 0\n  | S upto' => upto + sum upto'\n  end.","responses":[],"goals":[]}],[{"_type":"sentence","contents":"Lemma Gauss:\n  forall n, 2 * (sum n) = n * (n + 1).","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"forall n : nat, 2 * sum n = n * (n + 1)","hypotheses":[]}]},{"_type":"text","contents":"\n"},{"_type":"sentence","contents":"Proof.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"forall n : nat, 2 * sum n = n * (n + 1)","hypotheses":[]}]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"intros.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * sum n = n * (n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"}]}]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"induction n.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * sum 0 = 0 * (0 + 1)","hypotheses":[]},{"_type":"goal","name":null,"conclusion":"2 * sum (S n) = S n * (S n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"-","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * sum 0 = 0 * (0 + 1)","hypotheses":[]}]},{"_type":"text","contents":" (* n \u2190 0 *) "},{"_type":"sentence","contents":"reflexivity.","responses":[],"goals":[]},{"_type":"text","contents":"\n  "},{"_type":"sentence","contents":"-","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * sum (S n) = S n * (S n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":" (* n \u2190 S _ *)\n    "},{"_type":"sentence","contents":"cbn [sum].","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * (S n + sum n) = S n * (S n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"rewrite Mult.mult_plus_distr_l.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * S n + 2 * sum n = S n * (S n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"rewrite IHn.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * S n + n * (n + 1) = S n * (S n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"change (S n) with (1 + n).","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * (1 + n) + n * (n + 1) = (1 + n) * (1 + n + 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"rewrite !Mult.mult_plus_distr_l, !Mult.mult_plus_distr_r.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 * 1 + 2 * n + (n * n + n * 1) =\n1 * 1 + n * 1 + (1 * n + n * n) + (1 * 1 + n * 1)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"cbn [Nat.mul]; rewrite !Nat.mul_1_r, !Nat.add_0_r.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"1 + 1 + (n + n) + (n * n + n) =\n1 + n + (n + n * n) + (1 + n)","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"rewrite !Nat.add_assoc.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"1 + 1 + n + n + n * n + n = 1 + n + n + n * n + 1 + n","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"change (1 + 1) with 2.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 + n + n + n * n + n = 1 + n + n + n * n + 1 + n","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"rewrite !(Nat.add_comm _ 1), !Nat.add_assoc.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 + n + n + n * n + n = 1 + 1 + n + n + n * n + n","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"change (1 + 1) with 2.","responses":[],"goals":[{"_type":"goal","name":null,"conclusion":"2 + n + n + n * n + n = 2 + n + n + n * n + n","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":"\n    "},{"_type":"sentence","contents":"Show Existentials.","responses":["Existential 1 =\n?Goal : [n : nat  IHn : 2 * sum n = n * (n + 1)\n        |- 2 + n + n + n * n + n =\n           2 + n + n + n * n + n]"],"goals":[{"_type":"goal","name":null,"conclusion":"2 + n + n + n * n + n = 2 + n + n + n * n + n","hypotheses":[{"_type":"hypothesis","names":["n"],"body":null,"type":"nat"},{"_type":"hypothesis","names":["IHn"],"body":null,"type":"2 * sum n = n * (n + 1)"}]}]},{"_type":"text","contents":" (* .no-goals *)\n    "},{"_type":"sentence","contents":"reflexivity.","responses":[],"goals":[]},{"_type":"text","contents":"\n"},{"_type":"sentence","contents":"Qed.","responses":[],"goals":[]}]]}
+{
+  "metadata": {
+    "sertop_args": []
+  },
+  "chunks": [
+    "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).\n\nFixpoint even (n: nat): bool :=\n  match n with\n  | 0 => true\n  | 1 => false\n  | S (S n) => even n\n  end.",
+    "Fixpoint even_Even_fp (n: nat):\n  even n = true <-> Even n.\nProof.\n  destruct n as [ | [ | n ] ].\n  all: cbn.\n  - (* n \u2190 0 *)\n    split; intros.\n    all: constructor.\n  - (* n \u2190 1 *)\n    split.\n    all: inversion 1.\n  - (* n \u2190 S (S _) *)\n    split.\n    all: (constructor || inversion 1).\n    all: apply even_Even_fp.\n    all: assumption.\nQed.",
+    "Require Import Coq.Strings.String Coq.Arith.Arith\n        Coq.setoid_ring.ArithRing Coq.Bool.Bool.\nOpen Scope string_scope.\n\nDefinition rot13c c :=\n  let n := Ascii.nat_of_ascii c in\n  let n' :=\n    if (65 <=? n) && (n <=? 90) then\n      65 + (n - 65 + 13) mod 26\n    else if (97 <=? n) && (n <=? 122) then\n      97 + (n - 97 + 13) mod 26\n    else\n      n in\n  Ascii.ascii_of_nat n'.\n\nFixpoint rot13 msg :=\n  match msg with\n  | EmptyString => EmptyString\n  | String c s => String (rot13c c) (rot13 s)\n  end.",
+    "Compute (rot13 \"Uryyb, jbeyq!\").\nSearch (_ + _ = _ -> _ = _).",
+    "Fixpoint sum upto :=\n  match upto with\n  | O => 0\n  | S upto' => upto + sum upto'\n  end.",
+    "Lemma Gauss:\n  forall n, 2 * (sum n) = n * (n + 1).\nProof.\n  intros.\n  induction n.\n  - (* n \u2190 0 *) reflexivity.\n  - (* n \u2190 S _ *)\n    cbn [sum].\n    rewrite Mult.mult_plus_distr_l.\n    rewrite IHn.\n    change (S n) with (1 + n).\n    rewrite !Mult.mult_plus_distr_l, !Mult.mult_plus_distr_r.\n    cbn [Nat.mul]; rewrite !Nat.mul_1_r, !Nat.add_0_r.\n    rewrite !Nat.add_assoc.\n    change (1 + 1) with 2.\n    rewrite !(Nat.add_comm _ 1), !Nat.add_assoc.\n    change (1 + 1) with 2.\n    Show Existentials. (* .no-goals *)\n    reflexivity.\nQed."
+  ],
+  "annotated": [
+    [
+      {
+        "_type": "sentence",
+        "contents": "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint even (n: nat): bool :=\n  match n with\n  | 0 => true\n  | 1 => false\n  | S (S n) => even n\n  end.",
+        "responses": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint even_Even_fp (n: nat):\n  even n = true <-> Even n.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true <-> Even n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Proof.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true <-> Even n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "destruct n as [ | [ | n ] ].",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even 0 = true <-> Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even 1 = true <-> Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even (S (S n)) = true <-> Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: cbn.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "true = true <-> Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "false = true <-> Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true <-> Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "true = true <-> Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 0 *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "split; intros.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "true = true"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "true = true",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "Even 0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: constructor.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "false = true <-> Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 1 *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "split.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "false = true -> Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even 1 -> false = true",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n : nat,\neven n = true <-> Even n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: inversion 1.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true <-> Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 S (S _) *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "split.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true -> Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even (S (S n)) -> even n = true",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: (constructor || inversion 1).",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "even n = true"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n1 : nat,\neven n1 = true <-> Even n1"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "Even (S (S n))"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n0"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H1"
+                ],
+                "body": null,
+                "type": "Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H0"
+                ],
+                "body": null,
+                "type": "n0 = n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: apply even_Even_fp.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n0 : nat,\neven n0 = true <-> Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "even n = true"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "even_Even_fp"
+                ],
+                "body": null,
+                "type": "forall n1 : nat,\neven n1 = true <-> Even n1"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "Even (S (S n))"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n0"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H1"
+                ],
+                "body": null,
+                "type": "Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H0"
+                ],
+                "body": null,
+                "type": "n0 = n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: assumption.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "responses": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Import Coq.Strings.String Coq.Arith.Arith\n        Coq.setoid_ring.ArithRing Coq.Bool.Bool.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Open Scope string_scope.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition rot13c c :=\n  let n := Ascii.nat_of_ascii c in\n  let n' :=\n    if (65 <=? n) && (n <=? 90) then\n      65 + (n - 65 + 13) mod 26\n    else if (97 <=? n) && (n <=? 122) then\n      97 + (n - 97 + 13) mod 26\n    else\n      n in\n  Ascii.ascii_of_nat n'.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint rot13 msg :=\n  match msg with\n  | EmptyString => EmptyString\n  | String c s => String (rot13c c) (rot13 s)\n  end.",
+        "responses": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Compute (rot13 \"Uryyb, jbeyq!\").",
+        "responses": [
+          "     = \"Hello, world!\"\n     : string"
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Search (_ + _ = _ -> _ = _).",
+        "responses": [
+          "plus_reg_l: forall n m p : nat, p + n = p + m -> n = m",
+          "Nat.add_sub_eq_r:\n  forall n m p : nat, m + p = n -> n - p = m",
+          "Nat.add_sub_eq_l:\n  forall n m p : nat, m + p = n -> n - m = p"
+        ],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint sum upto :=\n  match upto with\n  | O => 0\n  | S upto' => upto + sum upto'\n  end.",
+        "responses": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Lemma Gauss:\n  forall n, 2 * (sum n) = n * (n + 1).",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "forall n : nat, 2 * sum n = n * (n + 1)",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Proof.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "forall n : nat, 2 * sum n = n * (n + 1)",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "intros.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * sum n = n * (n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "induction n.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * sum 0 = 0 * (0 + 1)",
+            "hypotheses": []
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * sum (S n) = S n * (S n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * sum 0 = 0 * (0 + 1)",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 0 *) "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * sum (S n) = S n * (S n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 S _ *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "cbn [sum].",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * (S n + sum n) = S n * (S n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite Mult.mult_plus_distr_l.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * S n + 2 * sum n = S n * (S n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite IHn.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * S n + n * (n + 1) = S n * (S n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "change (S n) with (1 + n).",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * (1 + n) + n * (n + 1) = (1 + n) * (1 + n + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite !Mult.mult_plus_distr_l, !Mult.mult_plus_distr_r.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 * 1 + 2 * n + (n * n + n * 1) =\n1 * 1 + n * 1 + (1 * n + n * n) + (1 * 1 + n * 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "cbn [Nat.mul]; rewrite !Nat.mul_1_r, !Nat.add_0_r.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "1 + 1 + (n + n) + (n * n + n) =\n1 + n + (n + n * n) + (1 + n)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite !Nat.add_assoc.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "1 + 1 + n + n + n * n + n = 1 + n + n + n * n + 1 + n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "change (1 + 1) with 2.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 + n + n + n * n + n = 1 + n + n + n * n + 1 + n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite !(Nat.add_comm _ 1), !Nat.add_assoc.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 + n + n + n * n + n = 1 + 1 + n + n + n * n + n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "change (1 + 1) with 2.",
+        "responses": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 + n + n + n * n + n = 2 + n + n + n * n + n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Show Existentials.",
+        "responses": [
+          "Existential 1 =\n?Goal : [n : nat  IHn : 2 * sum n = n * (n + 1)\n        |- 2 + n + n + n * n + n =\n           2 + n + n + n * n + n]"
+        ],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 + n + n + n * n + n = 2 + n + n + n * n + n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 * sum n = n * (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .no-goals *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "responses": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "responses": [],
+        "goals": []
+      }
+    ]
+  ]
+}
