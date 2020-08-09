@@ -1,6 +1,7 @@
 {
   "metadata": {
-    "sertop_args": []
+    "sertop_args": [],
+    "cache_version": "1"
   },
   "chunks": [
     "Require Coq.Strings.String Coq.Lists.List Coq.Arith.Arith.\nImport String Arith List.ListNotations.\nOpen Scope list_scope.",
@@ -40,7 +41,7 @@
       {
         "_type": "sentence",
         "contents": "Require Coq.Strings.String Coq.Lists.List Coq.Arith.Arith.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -50,7 +51,7 @@
       {
         "_type": "sentence",
         "contents": "Import String Arith List.ListNotations.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -60,7 +61,7 @@
       {
         "_type": "sentence",
         "contents": "Open Scope list_scope.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -68,7 +69,7 @@
       {
         "_type": "sentence",
         "contents": "Require Import Coq.Bool.Bool.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -78,7 +79,7 @@
       {
         "_type": "sentence",
         "contents": "Inductive UntypedAST : Type :=\n| UNat (n: nat)\n| UBool (b: bool)\n| UAdd (e1 e2: UntypedAST)\n| UAnd (e1 e2: UntypedAST).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -88,7 +89,7 @@
       {
         "_type": "sentence",
         "contents": "Inductive Tau :=\n| Nat\n| Bool.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -98,7 +99,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint Value' (tau: Tau) :=\n  match tau with\n  | Nat => nat\n  | Bool => bool\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -108,7 +109,7 @@
       {
         "_type": "sentence",
         "contents": "Inductive TypedAST' : Tau -> Type :=\n| TNat (n: nat) : TypedAST' Nat\n| TBool (b: bool) : TypedAST' Bool\n| TAdd (e1 e2: TypedAST' Nat): TypedAST' Nat\n| TAnd (e1 e2: TypedAST' Bool): TypedAST' Bool.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -118,7 +119,7 @@
       {
         "_type": "sentence",
         "contents": "Record TypedAST :=\n  { tau: Tau; ast: TypedAST' tau }.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -128,7 +129,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint typecheck (ast: UntypedAST) : option TypedAST :=\n  match ast with\n  | UNat n => Some {| ast := TNat n |}\n  | UBool b => Some {| ast := TBool b |}\n  | UAdd e1 e2 =>\n    match typecheck e1, typecheck e2 with\n    | Some {| tau := Nat; ast := t1 |},\n      Some {| tau := Nat; ast := t2 |} =>\n      Some {| ast := TAdd t1 t2 |}\n    | _, _ => None\n    end\n  | UAnd e1 e2 =>\n    match typecheck e1, typecheck e2 with\n    | Some {| tau := Bool; ast := t1 |},\n      Some {| tau := Bool; ast := t2 |} =>\n      Some {| ast := TAnd t1 t2 |}\n    | _, _ => None\n    end\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -138,7 +139,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint interp' {tau} (ast: TypedAST' tau) : Value' tau :=\n  match ast with\n  | TNat n => n\n  | TBool b => b\n  | TAdd e1 e2 => interp' e1 + interp' e2\n  | TAnd e1 e2 => interp' e1 && interp' e2\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -148,7 +149,7 @@
       {
         "_type": "sentence",
         "contents": "Record Value :=\n  { vtau: Tau; val: Value' vtau }.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -158,7 +159,7 @@
       {
         "_type": "sentence",
         "contents": "Definition interp (t: TypedAST) : Value :=\n  {| val := interp' t.(ast) |}.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -170,8 +171,11 @@
       {
         "_type": "sentence",
         "contents": "Check typecheck.",
-        "responses": [
-          "typecheck\n     : UntypedAST -> option TypedAST"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "typecheck\n     : UntypedAST -> option TypedAST"
+          }
         ],
         "goals": []
       },
@@ -182,8 +186,11 @@
       {
         "_type": "sentence",
         "contents": "Check interp.",
-        "responses": [
-          "interp\n     : TypedAST -> Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "interp\n     : TypedAST -> Value"
+          }
         ],
         "goals": []
       }
@@ -192,7 +199,7 @@
       {
         "_type": "sentence",
         "contents": "Example well_typed := UAdd (UNat 1) (UNat 1).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -202,7 +209,7 @@
       {
         "_type": "sentence",
         "contents": "Example ill_typed := UAdd (UNat 1) (UBool true).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -210,7 +217,7 @@
       {
         "_type": "sentence",
         "contents": "Definition tc_good := typecheck well_typed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -220,8 +227,11 @@
       {
         "_type": "sentence",
         "contents": "Compute tc_good.",
-        "responses": [
-          "     = Some\n         {|\n         tau := Nat;\n         ast := TAdd (TNat 1) (TNat 1) |}\n     : option TypedAST"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = Some\n         {|\n         tau := Nat;\n         ast := TAdd (TNat 1) (TNat 1) |}\n     : option TypedAST"
+          }
         ],
         "goals": []
       },
@@ -232,7 +242,7 @@
       {
         "_type": "sentence",
         "contents": "Definition tc_bad := typecheck ill_typed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -242,8 +252,11 @@
       {
         "_type": "sentence",
         "contents": "Compute tc_bad.",
-        "responses": [
-          "     = None\n     : option TypedAST"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = None\n     : option TypedAST"
+          }
         ],
         "goals": []
       },
@@ -256,8 +269,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Compute interp tc_good.",
-        "responses": [
-          "The command has indeed failed with message:\nThe term \"tc_good\" has type \"option TypedAST\"\nwhile it is expected to have type \"TypedAST\"."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nThe term \"tc_good\" has type \"option TypedAST\"\nwhile it is expected to have type \"TypedAST\"."
+          }
         ],
         "goals": []
       },
@@ -270,7 +286,7 @@
       {
         "_type": "sentence",
         "contents": "Definition unwrap_default (o: option TypedAST) : TypedAST :=\n  match o with\n  | Some t => t\n  | None => {| ast := TNat 1 |}\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -280,8 +296,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap_default tc_good).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       },
@@ -294,8 +313,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap_default tc_bad).",
-        "responses": [
-          "     = {| vtau := Nat; val := 1 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 1 |}\n     : Value"
+          }
         ],
         "goals": []
       },
@@ -312,7 +334,7 @@
       {
         "_type": "sentence",
         "contents": "Definition unwrap {A} (o: option A)\n            (not_none: o <> None) : A :=\n   match o return _ = o -> A with\n   | Some a => fun _ => a\n   | None => fun is_none => False_rect _ (not_none is_none)\n   end eq_refl.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -320,8 +342,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap tc_good\n  (fun some_eq_none =>\n    @eq_rect_r (option TypedAST) None\n               (fun o: option TypedAST =>\n                  if o then False else True)\n               I tc_good some_eq_none)).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       }
@@ -330,8 +355,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap tc_good ltac:(discriminate)).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       },
@@ -342,8 +370,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Compute interp (unwrap tc_bad ltac:(discriminate)).",
-        "responses": [
-          "The command has indeed failed with message:\nNot a discriminable equality."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nNot a discriminable equality."
+          }
         ],
         "goals": []
       },
@@ -356,8 +387,11 @@
       {
         "_type": "sentence",
         "contents": "Check (unwrap tc_good ltac:(discriminate)).",
-        "responses": [
-          "unwrap tc_good\n  (fun H : tc_good = None =>\n   let H0 : False :=\n     eq_ind tc_good\n       (fun e : option TypedAST =>\n        match e with\n        | Some _ => True\n        | None => False\n        end) I None H in\n   False_ind False H0)\n     : TypedAST"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "unwrap tc_good\n  (fun H : tc_good = None =>\n   let H0 : False :=\n     eq_ind tc_good\n       (fun e : option TypedAST =>\n        match e with\n        | Some _ => True\n        | None => False\n        end) I None H in\n   False_ind False H0)\n     : TypedAST"
+          }
         ],
         "goals": []
       }
@@ -366,7 +400,7 @@
       {
         "_type": "sentence",
         "contents": "Definition nth_in_bounds {A} (l: list A) (n: nat)\n           (in_bounds: n < List.length l) :=\n  unwrap (List.nth_error l n)\n         (proj2 (List.nth_error_Some l n) in_bounds).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -376,8 +410,11 @@
       {
         "_type": "sentence",
         "contents": "Compute nth_in_bounds [1; 2; 3] 2\n           ltac:(repeat constructor).",
-        "responses": [
-          "     = 3\n     : nat"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = 3\n     : nat"
+          }
         ],
         "goals": []
       },
@@ -390,8 +427,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap tc_good _).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       }
@@ -400,8 +440,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (unwrap None _).",
-        "responses": [
-          "     = match ?not_none eq_refl return ?A with\n       end\n     : ?A"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = match ?not_none eq_refl return ?A with\n       end\n     : ?A"
+          }
         ],
         "goals": []
       }
@@ -410,8 +453,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Definition good := (* .fails *)\n  Eval compute in interp (unwrap tc_good _).",
-        "responses": [
-          "The command has indeed failed with message:\nCannot infer this placeholder of type\n\"tc_good <> None\"."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nCannot infer this placeholder of type\n\"tc_good <> None\"."
+          }
         ],
         "goals": []
       }
@@ -424,7 +470,7 @@
       {
         "_type": "sentence",
         "contents": "Definition is_some {A} (o: option A) : bool :=\n   if o then true else false.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -434,7 +480,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma is_some_not_none {A} {o: option A} :\n   is_some o = true -> o <> None.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -468,7 +514,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -502,7 +548,7 @@
       {
         "_type": "sentence",
         "contents": "destruct o.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -551,7 +597,7 @@
       {
         "_type": "sentence",
         "contents": "all: cbn.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -600,7 +646,7 @@
       {
         "_type": "sentence",
         "contents": "all: congruence.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -610,7 +656,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -622,7 +668,7 @@
       {
         "_type": "sentence",
         "contents": "Definition unwrap_dec {A} (o: option A)\n            (is_some_true: is_some o = true) : A :=\n   unwrap o (is_some_not_none is_some_true).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -632,8 +678,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap_dec tc_good eq_refl).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       },
@@ -646,7 +695,7 @@
       {
         "_type": "sentence",
         "contents": "Notation unwrap_dec' o := (unwrap_dec o eq_refl).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -654,7 +703,7 @@
       {
         "_type": "sentence",
         "contents": "Definition nth_in_bounds_dec {A} (l: list A) (n: nat)\n           (lt_true: (n <? List.length l) = true) :=\n  nth_in_bounds l n (proj1 (Nat.ltb_lt _ _) lt_true).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -664,8 +713,11 @@
       {
         "_type": "sentence",
         "contents": "Compute nth_in_bounds_dec [1; 2; 3] 2 eq_refl.",
-        "responses": [
-          "     = 3\n     : nat"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = 3\n     : nat"
+          }
         ],
         "goals": []
       },
@@ -678,8 +730,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap_dec tc_good _).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       },
@@ -690,8 +745,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Compute interp (unwrap_dec None eq_refl).",
-        "responses": [
-          "The command has indeed failed with message:\nThe term \"eq_refl\" has type\n \"is_some None = is_some None\"\nwhile it is expected to have type\n \"is_some None = true\"."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nThe term \"eq_refl\" has type\n \"is_some None = is_some None\"\nwhile it is expected to have type\n \"is_some None = true\"."
+          }
         ],
         "goals": []
       },
@@ -702,8 +760,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap_dec None _).",
-        "responses": [
-          "     = {|\n       vtau := let (tau, _) :=\n                 match\n                   is_some_not_none ?is_some_true\n                     eq_refl return TypedAST\n                 with\n                 end in\n               tau;\n       val := (fix\n               Ffix (x : Tau) (x0 : TypedAST' x)\n                    {struct x0} :\n                 (fix Ffix0 (x1 : Tau) : Set :=\n                    match x1 with\n                    | Nat => nat\n                    | Bool => bool\n                    end) x :=\n                 match\n                   x0 in (TypedAST' H)\n                   return\n                     ((fix Ffix0 (x1 : Tau) : Set :=\n                         match x1 with\n                         | Nat => nat\n                         | Bool => bool\n                         end) H)\n                 with\n                 | TNat n => n\n                 | TBool b => b\n                 | TAdd e1 e2 =>\n                     (fix\n                      Ffix0 (x1 x2 : nat) {struct x1} :\n                        nat :=\n                        match x1 with\n                        | 0 => x2\n                        | S x3 => S (Ffix0 x3 x2)\n                        end) (Ffix Nat e1)\n                       (Ffix Nat e2)\n                 | TAnd e1 e2 =>\n                     if Ffix Bool e1\n                     then Ffix Bool e2\n                     else false\n                 end)\n                (let (tau, _) :=\n                   match\n                     is_some_not_none ?is_some_true\n                       eq_refl return TypedAST\n                   with\n                   end in\n                 tau)\n                (let\n                   (tau, ast) as c\n                    return\n                      (TypedAST'\n                         (let (tau, _) := c in tau)) :=\n                   match\n                     is_some_not_none ?is_some_true\n                       eq_refl return TypedAST\n                   with\n                   end in\n                 ast) |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {|\n       vtau := let (tau, _) :=\n                 match\n                   is_some_not_none ?is_some_true\n                     eq_refl return TypedAST\n                 with\n                 end in\n               tau;\n       val := (fix\n               Ffix (x : Tau) (x0 : TypedAST' x)\n                    {struct x0} :\n                 (fix Ffix0 (x1 : Tau) : Set :=\n                    match x1 with\n                    | Nat => nat\n                    | Bool => bool\n                    end) x :=\n                 match\n                   x0 in (TypedAST' H)\n                   return\n                     ((fix Ffix0 (x1 : Tau) : Set :=\n                         match x1 with\n                         | Nat => nat\n                         | Bool => bool\n                         end) H)\n                 with\n                 | TNat n => n\n                 | TBool b => b\n                 | TAdd e1 e2 =>\n                     (fix\n                      Ffix0 (x1 x2 : nat) {struct x1} :\n                        nat :=\n                        match x1 with\n                        | 0 => x2\n                        | S x3 => S (Ffix0 x3 x2)\n                        end) (Ffix Nat e1)\n                       (Ffix Nat e2)\n                 | TAnd e1 e2 =>\n                     if Ffix Bool e1\n                     then Ffix Bool e2\n                     else false\n                 end)\n                (let (tau, _) :=\n                   match\n                     is_some_not_none ?is_some_true\n                       eq_refl return TypedAST\n                   with\n                   end in\n                 tau)\n                (let\n                   (tau, ast) as c\n                    return\n                      (TypedAST'\n                         (let (tau, _) := c in tau)) :=\n                   match\n                     is_some_not_none ?is_some_true\n                       eq_refl return TypedAST\n                   with\n                   end in\n                 ast) |}\n     : Value"
+          }
         ],
         "goals": []
       }
@@ -712,7 +773,7 @@
       {
         "_type": "sentence",
         "contents": "Inductive error : string -> Type := Err (s: string) : error s.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -722,7 +783,7 @@
       {
         "_type": "sentence",
         "contents": "Definition unwrap_dep {A} (o: option A)\n  : if o then A else error _ :=\n  match o with\n  | Some a => a\n  | None => Err \"Expecting Some, got None\"\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -732,8 +793,11 @@
       {
         "_type": "sentence",
         "contents": "Compute interp (unwrap_dep tc_good).",
-        "responses": [
-          "     = {| vtau := Nat; val := 2 |}\n     : Value"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| vtau := Nat; val := 2 |}\n     : Value"
+          }
         ],
         "goals": []
       },
@@ -746,8 +810,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Compute interp (unwrap_dep tc_bad).",
-        "responses": [
-          "The command has indeed failed with message:\nThe term \"unwrap_dep tc_bad\" has type\n \"if tc_bad\n  then TypedAST\n  else error \"Expecting Some, got None\"\"\nwhile it is expected to have type \"TypedAST\"."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nThe term \"unwrap_dep tc_bad\" has type\n \"if tc_bad\n  then TypedAST\n  else error \"Expecting Some, got None\"\"\nwhile it is expected to have type \"TypedAST\"."
+          }
         ],
         "goals": []
       },
@@ -760,7 +827,7 @@
       {
         "_type": "sentence",
         "contents": "Definition nth_in_bounds_dep {A} (l: list A) (n: nat)\n  : if lt_dec n (List.length l) then A else error _ :=\n  match lt_dec n (List.length l) as cmp\n    return (if cmp then A else error _) with\n  | left in_bounds => nth_in_bounds l n in_bounds\n  | right _ => Err \"Index is out of bounds\"\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -768,8 +835,11 @@
       {
         "_type": "sentence",
         "contents": "Compute nth_in_bounds_dep [1; 2; 3] 2.",
-        "responses": [
-          "     = 3\n     : if lt_dec 2 (Datatypes.length [1; 2; 3])\n       then nat\n       else error \"Index is out of bounds\""
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = 3\n     : if lt_dec 2 (Datatypes.length [1; 2; 3])\n       then nat\n       else error \"Index is out of bounds\""
+          }
         ],
         "goals": []
       },
@@ -780,8 +850,11 @@
       {
         "_type": "sentence",
         "contents": "Compute nth_in_bounds_dep [1; 2; 3] 7.",
-        "responses": [
-          "     = Err \"Index is out of bounds\"\n     : if lt_dec 7 (Datatypes.length [1; 2; 3])\n       then nat\n       else error \"Index is out of bounds\""
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = Err \"Index is out of bounds\"\n     : if lt_dec 7 (Datatypes.length [1; 2; 3])\n       then nat\n       else error \"Index is out of bounds\""
+          }
         ],
         "goals": []
       }
@@ -790,7 +863,7 @@
       {
         "_type": "sentence",
         "contents": "Notation compute_all term :=\n  ltac:(let term := (eval compute in term) in\n        exact_no_check term) (only parsing).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -800,8 +873,11 @@
       {
         "_type": "sentence",
         "contents": "Check (compute_all (nth_in_bounds_dep [1; 2; 3] 2)).",
-        "responses": [
-          "3\n     : nat"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "3\n     : nat"
+          }
         ],
         "goals": []
       },
@@ -814,7 +890,7 @@
       {
         "_type": "sentence",
         "contents": "Notation compute_in_type term :=\n  ltac:(let type := type of term in\n        let type := (eval compute in type) in\n        exact_no_check (term: type)) (only parsing).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -824,8 +900,11 @@
       {
         "_type": "sentence",
         "contents": "Check (compute_in_type (nth_in_bounds_dep [1; 2; 3] 2)).",
-        "responses": [
-          "nth_in_bounds_dep [1; 2; 3] 2 : nat\n     : nat"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "nth_in_bounds_dep [1; 2; 3] 2 : nat\n     : nat"
+          }
         ],
         "goals": []
       },
@@ -838,7 +917,7 @@
       {
         "_type": "sentence",
         "contents": "Notation unwrap_refl o :=\n  ((fun v (pf : o = Some v) => v) _ eq_refl) (only parsing).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -848,8 +927,11 @@
       {
         "_type": "sentence",
         "contents": "Compute unwrap_refl tc_good.",
-        "responses": [
-          "     = {| tau := Nat; ast := TAdd (TNat 1) (TNat 1) |}\n     : TypedAST"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = {| tau := Nat; ast := TAdd (TNat 1) (TNat 1) |}\n     : TypedAST"
+          }
         ],
         "goals": []
       },
@@ -862,7 +944,7 @@
       {
         "_type": "sentence",
         "contents": "Notation unwrap_tac opt :=\n  ltac:(match (eval hnf in opt) with\n        | Some ?v => exact v\n        | ?other => fail \"Error:\" other \"isn't [Some _]\"\n        end) (only parsing).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -870,8 +952,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Compute (unwrap_tac (Som 1)).",
-        "responses": [
-          "The command has indeed failed with message:\nThe reference opt was not found in the current\nenvironment."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nThe reference opt was not found in the current\nenvironment."
+          }
         ],
         "goals": []
       }
@@ -880,7 +965,7 @@
       {
         "_type": "sentence",
         "contents": "Notation unwrap_tac' opt :=\n  (match opt with _ =>\n   ltac:(match (eval hnf in opt) with\n         | Some ?v => exact v\n         | ?other => fail \"Error:\" other \"isn't [Some _]\"\n         end) end) (only parsing).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -890,8 +975,11 @@
       {
         "_type": "sentence",
         "contents": "Fail Compute (unwrap_tac' (Som 1)).",
-        "responses": [
-          "The command has indeed failed with message:\nThe reference Som was not found in the current\nenvironment."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nThe reference Som was not found in the current\nenvironment."
+          }
         ],
         "goals": []
       },

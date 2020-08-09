@@ -1,6 +1,7 @@
 {
   "metadata": {
-    "sertop_args": []
+    "sertop_args": [],
+    "cache_version": "1"
   },
   "chunks": [
     "Require Coq.Vectors.Vector.\nRequire Import Coq.Strings.String Coq.Arith.PeanoNat.",
@@ -36,7 +37,7 @@
       {
         "_type": "sentence",
         "contents": "Require Coq.Vectors.Vector.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -46,7 +47,7 @@
       {
         "_type": "sentence",
         "contents": "Require Import Coq.Strings.String Coq.Arith.PeanoNat.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -54,7 +55,7 @@
       {
         "_type": "sentence",
         "contents": "Import EqNotations Vector.VectorNotations.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -64,8 +65,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (Vector.hd (rew (Nat.add_1_r 3) in ([1; 2; 3] ++ [4]))).",
-        "responses": [
-          "     = match\n         match\n           Nat.add_1_r 3 in (_ = H)\n           return (Vector.t nat H)\n         with\n         | eq_refl => [1; 2; 3; 4]\n         end as c in (Vector.t _ H)\n         return\n           (match\n              H as c0 return (Vector.t nat c0 -> Type)\n            with\n            | 0 =>\n                fun _ : Vector.t nat 0 =>\n                False -> forall x1 : Prop, x1 -> x1\n            | S x => fun _ : Vector.t nat (S x) => nat\n            end c)\n       with\n       | [] =>\n           fun x : False =>\n           match\n             x return (forall x0 : Prop, x0 -> x0)\n           with\n           end\n       | h :: _ => h\n       end\n     : (fun (n : nat) (_ : Vector.t nat (S n)) => nat)\n         3\n         (rew [Vector.t nat] Nat.add_1_r 3 in\n          ([1; 2; 3] ++ [4]))"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = match\n         match\n           Nat.add_1_r 3 in (_ = H)\n           return (Vector.t nat H)\n         with\n         | eq_refl => [1; 2; 3; 4]\n         end as c in (Vector.t _ H)\n         return\n           (match\n              H as c0 return (Vector.t nat c0 -> Type)\n            with\n            | 0 =>\n                fun _ : Vector.t nat 0 =>\n                False -> forall x1 : Prop, x1 -> x1\n            | S x => fun _ : Vector.t nat (S x) => nat\n            end c)\n       with\n       | [] =>\n           fun x : False =>\n           match\n             x return (forall x0 : Prop, x0 -> x0)\n           with\n           end\n       | h :: _ => h\n       end\n     : (fun (n : nat) (_ : Vector.t nat (S n)) => nat)\n         3\n         (rew [Vector.t nat] Nat.add_1_r 3 in\n          ([1; 2; 3] ++ [4]))"
+          }
         ],
         "goals": []
       }
@@ -74,7 +78,7 @@
       {
         "_type": "sentence",
         "contents": "Definition transparent : nat := 1 + 1.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -84,8 +88,11 @@
       {
         "_type": "sentence",
         "contents": "Compute transparent.",
-        "responses": [
-          "     = 2\n     : nat"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = 2\n     : nat"
+          }
         ],
         "goals": []
       },
@@ -96,7 +103,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma opaque : 1 + 1 = 2.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -113,7 +120,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -130,7 +137,7 @@
       {
         "_type": "sentence",
         "contents": "auto.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -140,7 +147,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -150,8 +157,11 @@
       {
         "_type": "sentence",
         "contents": "Compute opaque.",
-        "responses": [
-          "     = opaque\n     : 1 + 1 = 2"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = opaque\n     : 1 + 1 = 2"
+          }
         ],
         "goals": []
       },
@@ -164,7 +174,7 @@
       {
         "_type": "sentence",
         "contents": "Definition snoc {A n} (a: A) (v: Vector.t A n)\n  : Vector.t A (S n) :=\n  (* [Nat.add_1_r] has type [forall n : nat, n + 1 = S n] *)\n  rew (Nat.add_1_r n) in (v ++ [a]).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -172,7 +182,7 @@
       {
         "_type": "sentence",
         "contents": "Definition snoc_proofmode {A n} (a: A) (v: Vector.t A n)\n  : Vector.t A (S n).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -222,7 +232,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -272,7 +282,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite <- Nat.add_1_r.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -322,7 +332,7 @@
       {
         "_type": "sentence",
         "contents": "exact (v ++ [a]).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -332,7 +342,7 @@
       {
         "_type": "sentence",
         "contents": "Defined.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -340,8 +350,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (Vector.map (fun x => 2 * x) (snoc 4 [1; 2; 3])).",
-        "responses": [
-          "     = (fix\n        Ffix (x : nat) (x0 : Vector.t nat x) {struct\n             x0} : Vector.t nat x :=\n          match\n            x0 in (Vector.t _ H)\n            return (Vector.t nat H)\n          with\n          | [] => []\n          | Vector.cons _ h n x1 =>\n              (fix Ffix0 (x2 x3 : nat) {struct x2} :\n                 nat :=\n                 match x2 with\n                 | 0 => x3\n                 | S x4 => S (Ffix0 x4 x3)\n                 end) h\n                ((fix\n                  Ffix0 (x2 x3 : nat) {struct x2} :\n                    nat :=\n                    match x2 with\n                    | 0 => x3\n                    | S x4 => S (Ffix0 x4 x3)\n                    end) h 0) :: Ffix n x1\n          end) 4\n         match\n           Nat.add_1_r 3 in (_ = H)\n           return (Vector.t nat H)\n         with\n         | eq_refl => [1; 2; 3; 4]\n         end\n     : Vector.t nat 4"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = (fix\n        Ffix (x : nat) (x0 : Vector.t nat x) {struct\n             x0} : Vector.t nat x :=\n          match\n            x0 in (Vector.t _ H)\n            return (Vector.t nat H)\n          with\n          | [] => []\n          | Vector.cons _ h n x1 =>\n              (fix Ffix0 (x2 x3 : nat) {struct x2} :\n                 nat :=\n                 match x2 with\n                 | 0 => x3\n                 | S x4 => S (Ffix0 x4 x3)\n                 end) h\n                ((fix\n                  Ffix0 (x2 x3 : nat) {struct x2} :\n                    nat :=\n                    match x2 with\n                    | 0 => x3\n                    | S x4 => S (Ffix0 x4 x3)\n                    end) h 0) :: Ffix n x1\n          end) 4\n         match\n           Nat.add_1_r 3 in (_ = H)\n           return (Vector.t nat H)\n         with\n         | eq_refl => [1; 2; 3; 4]\n         end\n     : Vector.t nat 4"
+          }
         ],
         "goals": []
       },
@@ -354,7 +367,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma map_snoc_1234 :\n  Vector.map (fun x => 2 * x) (snoc 4 [1; 2; 3]) = [2; 4; 6; 8].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -371,7 +384,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -390,8 +403,11 @@
       {
         "_type": "sentence",
         "contents": "Fail reflexivity.",
-        "responses": [
-          "The command has indeed failed with message:\nUnable to unify \"[2; 4; 6; 8]\" with\n \"Vector.map (fun x : nat => 2 * x) (snoc 4 [1; 2; 3])\"."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nUnable to unify \"[2; 4; 6; 8]\" with\n \"Vector.map (fun x : nat => 2 * x) (snoc 4 [1; 2; 3])\"."
+          }
         ],
         "goals": [
           {
@@ -415,7 +431,7 @@
       {
         "_type": "sentence",
         "contents": "cbv -[Vector.map Nat.mul eq_rect].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -432,7 +448,7 @@
       {
         "_type": "sentence",
         "contents": "unfold eq_rect.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -447,7 +463,7 @@
       {
         "_type": "sentence",
         "contents": "Abort.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -455,7 +471,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma map_snoc_1234 :\n  Vector.map (fun x => 2 * x) (snoc 4 [1; 2; 3]) = [2; 4; 6; 8].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -472,7 +488,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -489,7 +505,7 @@
       {
         "_type": "sentence",
         "contents": "cbv -[Vector.map Nat.mul].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -506,8 +522,11 @@
       {
         "_type": "sentence",
         "contents": "Fail destruct (Nat.add_1_r 3).",
-        "responses": [
-          "The command has indeed failed with message:\nAbstracting over the terms \"n\" and \"e\" leads to a term\nfun (n0 : nat) (e0 : 3 + 1 = n0) =>\nVector.map (fun x : nat => 2 * x)\n  match e0 in (_ = y) return (Vector.t nat y) with\n  | eq_refl => [1; 2; 3; n0]\n  end = [2; n0; S (S n0); S (S (S (S n0)))]\nwhich is ill-typed.\nReason is: Incorrect elimination of \"e0\"\n           in the inductive type \"@eq\":\nill-formed elimination predicate."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nAbstracting over the terms \"n\" and \"e\" leads to a term\nfun (n0 : nat) (e0 : 3 + 1 = n0) =>\nVector.map (fun x : nat => 2 * x)\n  match e0 in (_ = y) return (Vector.t nat y) with\n  | eq_refl => [1; 2; 3; n0]\n  end = [2; n0; S (S n0); S (S (S (S n0)))]\nwhich is ill-typed.\nReason is: Incorrect elimination of \"e0\"\n           in the inductive type \"@eq\":\nill-formed elimination predicate."
+          }
         ],
         "goals": [
           {
@@ -525,7 +544,7 @@
       {
         "_type": "sentence",
         "contents": "Abort.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -533,7 +552,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma map_app {A B} (f: A -> B):\n  forall {n1} (v1: Vector.t A n1)\n         {n2} (v2: Vector.t A n2),\n    Vector.map f (v1 ++ v2) =\n    Vector.map f v1 ++ Vector.map f v2.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -575,7 +594,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -617,7 +636,7 @@
       {
         "_type": "sentence",
         "contents": "induction v1; cbn; congruence.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -627,7 +646,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -635,7 +654,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma snoc_map {A B n} :\n  forall (v: Vector.t A n) (f: A -> B) a,\n    Vector.map f (snoc a v) =\n    snoc (f a) (Vector.map f v).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -677,7 +696,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -719,7 +738,7 @@
       {
         "_type": "sentence",
         "contents": "intros; unfold snoc.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -785,7 +804,7 @@
       {
         "_type": "sentence",
         "contents": "destruct (Nat.add_1_r n).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -853,7 +872,7 @@
       {
         "_type": "sentence",
         "contents": "cbn.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -919,7 +938,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite map_app.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -985,7 +1004,7 @@
       {
         "_type": "sentence",
         "contents": "reflexivity.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -995,7 +1014,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1003,7 +1022,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma map_snoc_1234 :\n  Vector.map (fun x => 2 * x) (snoc 4 [1; 2; 3]) = [2; 4; 6; 8].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1020,7 +1039,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1037,7 +1056,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite snoc_map.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1054,7 +1073,7 @@
       {
         "_type": "sentence",
         "contents": "cbv.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1077,8 +1096,11 @@
       {
         "_type": "sentence",
         "contents": "Fail destruct (Nat.add_1_r 3).",
-        "responses": [
-          "The command has indeed failed with message:\nAbstracting over the terms \"n\" and \"e\" leads to a term\nfun (n0 : nat) (e0 : 3 + 1 = n0) =>\nmatch e0 in (_ = y) return (Vector.t nat y) with\n| eq_refl => [2; n0; S (S n0); S (S (S (S n0)))]\nend = [2; n0; S (S n0); S (S (S (S n0)))]\nwhich is ill-typed.\nReason is: Incorrect elimination of \"e0\"\n           in the inductive type \"@eq\":\nill-formed elimination predicate."
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nAbstracting over the terms \"n\" and \"e\" leads to a term\nfun (n0 : nat) (e0 : 3 + 1 = n0) =>\nmatch e0 in (_ = y) return (Vector.t nat y) with\n| eq_refl => [2; n0; S (S n0); S (S (S (S n0)))]\nend = [2; n0; S (S n0); S (S (S (S n0)))]\nwhich is ill-typed.\nReason is: Incorrect elimination of \"e0\"\n           in the inductive type \"@eq\":\nill-formed elimination predicate."
+          }
         ],
         "goals": [
           {
@@ -1098,7 +1120,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite (Eqdep_dec.UIP_refl_nat _ (Nat.add_1_r 3)).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1115,7 +1137,7 @@
       {
         "_type": "sentence",
         "contents": "reflexivity.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1125,7 +1147,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1133,7 +1155,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma add_1_r_transparent_proofmode (n: nat) : n + 1 = S n.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1159,7 +1181,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1185,7 +1207,7 @@
       {
         "_type": "sentence",
         "contents": "induction n.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1225,7 +1247,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1242,7 +1264,7 @@
       {
         "_type": "sentence",
         "contents": "reflexivity.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1252,7 +1274,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1286,7 +1308,7 @@
       {
         "_type": "sentence",
         "contents": "cbn.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1320,7 +1342,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite IHn.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1354,7 +1376,7 @@
       {
         "_type": "sentence",
         "contents": "reflexivity.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1364,7 +1386,7 @@
       {
         "_type": "sentence",
         "contents": "Defined.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1376,7 +1398,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint add_1_r_transparent (n: nat)\n  : n + 1 = S n :=\n  match n with\n  | 0 => eq_refl\n  | S n =>\n    match add_1_r_transparent n in (_ = y)\n      return (S n + 1 = S y) with\n    | eq_refl => eq_refl\n    end\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1384,7 +1406,7 @@
       {
         "_type": "sentence",
         "contents": "Definition snoc_computational {A n} (a: A) (v: Vector.t A n)\n  : Vector.t A (S n) :=\n  rew (add_1_r_transparent n) in (v ++ [a]).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1392,8 +1414,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (Vector.map (fun x => 2 * x)\n                    (snoc_computational 4 [1; 2; 3])).",
-        "responses": [
-          "     = [2; 4; 6; 8]\n     : Vector.t nat 4"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [2; 4; 6; 8]\n     : Vector.t nat 4"
+          }
         ],
         "goals": []
       }
@@ -1402,7 +1427,7 @@
       {
         "_type": "sentence",
         "contents": "Definition computational_eq {m n} (opaque_eq: m = n) : m = n :=\n  match Nat.eq_dec m n with\n  | left transparent_eq => transparent_eq\n  | _ => opaque_eq (* dead code; could use [False_rect] *)\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1410,7 +1435,7 @@
       {
         "_type": "sentence",
         "contents": "Definition snoc' {A n} (a: A) (v: Vector.t A n) :=\n  rew (computational_eq (Nat.add_1_r n)) in (v ++ [a]).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1418,8 +1443,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (Vector.map (fun x => 2 * x) (snoc' 4 [1; 2; 3])).",
-        "responses": [
-          "     = [2; 4; 6; 8]\n     : Vector.t nat 4"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [2; 4; 6; 8]\n     : Vector.t nat 4"
+          }
         ],
         "goals": []
       }
@@ -1428,8 +1456,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (@Fin.of_nat_lt 3 4 (PeanoNat.Nat.lt_succ_diag_r 3)).",
-        "responses": [
-          "     = Fin.FS (Fin.FS (Fin.FS Fin.F1))\n     : Fin.t 4"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = Fin.FS (Fin.FS (Fin.FS Fin.F1))\n     : Fin.t 4"
+          }
         ],
         "goals": []
       }
@@ -1438,7 +1469,7 @@
       {
         "_type": "sentence",
         "contents": "Definition computational_eq_cbv {m n: nat}\n    (thunked_eq: unit -> m = n) : m = n :=\n  match Nat.eq_dec m n with\n  | left transparent_eq => transparent_eq\n  | _ => thunked_eq tt\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1446,7 +1477,7 @@
       {
         "_type": "sentence",
         "contents": "Require Import Extraction.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1456,8 +1487,11 @@
       {
         "_type": "sentence",
         "contents": "Extraction computational_eq.",
-        "responses": [
-          "(** val computational_eq : __ **)\n\nlet computational_eq =\n  __"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "(** val computational_eq : __ **)\n\nlet computational_eq =\n  __"
+          }
         ],
         "goals": []
       }

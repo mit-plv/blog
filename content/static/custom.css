@@ -2,10 +2,6 @@
     overflow: visible; /* don't truncate goal bubbles */
 }
 
-.alectryon-io .highlight {
-    background: none;
-}
-
 main article code,
 main article kbd,
 main article pre,
@@ -44,12 +40,6 @@ main {
     article > header ~ section {
         padding-right: 50%;
     }
-}
-
-.alectryon-io .coq-goal,
-.alectryon-io .coq-response {
-    font-weight: normal;
-    font-size: inherit;
 }
 
 .alectryon-io .alectryon-target .coq-input {

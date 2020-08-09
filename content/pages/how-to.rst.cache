@@ -1,6 +1,7 @@
 {
   "metadata": {
-    "sertop_args": []
+    "sertop_args": [],
+    "cache_version": "1"
   },
   "chunks": [
     "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).\n\nFixpoint even (n: nat): bool :=\n  match n with\n  | 0 => true\n  | 1 => false\n  | S (S n) => even n\n  end.",
@@ -15,7 +16,7 @@
       {
         "_type": "sentence",
         "contents": "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -25,7 +26,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint even (n: nat): bool :=\n  match n with\n  | 0 => true\n  | 1 => false\n  | S (S n) => even n\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -33,7 +34,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint even_Even_fp (n: nat):\n  even n = true <-> Even n.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -67,7 +68,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -101,7 +102,7 @@
       {
         "_type": "sentence",
         "contents": "destruct n as [ | [ | n ] ].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -165,7 +166,7 @@
       {
         "_type": "sentence",
         "contents": "all: cbn.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -229,7 +230,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -255,7 +256,7 @@
       {
         "_type": "sentence",
         "contents": "split; intros.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -312,7 +313,7 @@
       {
         "_type": "sentence",
         "contents": "all: constructor.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -322,7 +323,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -348,7 +349,7 @@
       {
         "_type": "sentence",
         "contents": "split.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -389,7 +390,7 @@
       {
         "_type": "sentence",
         "contents": "all: inversion 1.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -399,7 +400,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -433,7 +434,7 @@
       {
         "_type": "sentence",
         "contents": "split.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -490,7 +491,7 @@
       {
         "_type": "sentence",
         "contents": "all: (constructor || inversion 1).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -587,7 +588,7 @@
       {
         "_type": "sentence",
         "contents": "all: apply even_Even_fp.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -684,7 +685,7 @@
       {
         "_type": "sentence",
         "contents": "all: assumption.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -694,7 +695,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -702,7 +703,7 @@
       {
         "_type": "sentence",
         "contents": "Require Import Coq.Strings.String Coq.Arith.Arith\n        Coq.setoid_ring.ArithRing Coq.Bool.Bool.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -712,7 +713,7 @@
       {
         "_type": "sentence",
         "contents": "Open Scope string_scope.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -722,7 +723,7 @@
       {
         "_type": "sentence",
         "contents": "Definition rot13c c :=\n  let n := Ascii.nat_of_ascii c in\n  let n' :=\n    if (65 <=? n) && (n <=? 90) then\n      65 + (n - 65 + 13) mod 26\n    else if (97 <=? n) && (n <=? 122) then\n      97 + (n - 97 + 13) mod 26\n    else\n      n in\n  Ascii.ascii_of_nat n'.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -732,7 +733,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint rot13 msg :=\n  match msg with\n  | EmptyString => EmptyString\n  | String c s => String (rot13c c) (rot13 s)\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -740,8 +741,11 @@
       {
         "_type": "sentence",
         "contents": "Compute (rot13 \"Uryyb, jbeyq!\").",
-        "responses": [
-          "     = \"Hello, world!\"\n     : string"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = \"Hello, world!\"\n     : string"
+          }
         ],
         "goals": []
       },
@@ -752,10 +756,19 @@
       {
         "_type": "sentence",
         "contents": "Search (_ + _ = _ -> _ = _).",
-        "responses": [
-          "plus_reg_l: forall n m p : nat, p + n = p + m -> n = m",
-          "Nat.add_sub_eq_r:\n  forall n m p : nat, m + p = n -> n - p = m",
-          "Nat.add_sub_eq_l:\n  forall n m p : nat, m + p = n -> n - m = p"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "plus_reg_l: forall n m p : nat, p + n = p + m -> n = m"
+          },
+          {
+            "_type": "message",
+            "contents": "Nat.add_sub_eq_r:\n  forall n m p : nat, m + p = n -> n - p = m"
+          },
+          {
+            "_type": "message",
+            "contents": "Nat.add_sub_eq_l:\n  forall n m p : nat, m + p = n -> n - m = p"
+          }
         ],
         "goals": []
       }
@@ -764,7 +777,7 @@
       {
         "_type": "sentence",
         "contents": "Fixpoint sum upto :=\n  match upto with\n  | O => 0\n  | S upto' => upto + sum upto'\n  end.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -772,7 +785,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma Gauss:\n  forall n, 2 * (sum n) = n * (n + 1).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -789,7 +802,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -806,7 +819,7 @@
       {
         "_type": "sentence",
         "contents": "intros.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -832,7 +845,7 @@
       {
         "_type": "sentence",
         "contents": "induction n.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -872,7 +885,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -889,7 +902,7 @@
       {
         "_type": "sentence",
         "contents": "reflexivity.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -899,7 +912,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -933,7 +946,7 @@
       {
         "_type": "sentence",
         "contents": "cbn [sum].",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -967,7 +980,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite Mult.mult_plus_distr_l.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1001,7 +1014,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite IHn.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1035,7 +1048,7 @@
       {
         "_type": "sentence",
         "contents": "change (S n) with (1 + n).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1069,7 +1082,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite !Mult.mult_plus_distr_l, !Mult.mult_plus_distr_r.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1103,7 +1116,7 @@
       {
         "_type": "sentence",
         "contents": "cbn [Nat.mul]; rewrite !Nat.mul_1_r, !Nat.add_0_r.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1137,7 +1150,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite !Nat.add_assoc.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1171,7 +1184,7 @@
       {
         "_type": "sentence",
         "contents": "change (1 + 1) with 2.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1205,7 +1218,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite !(Nat.add_comm _ 1), !Nat.add_assoc.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1239,7 +1252,7 @@
       {
         "_type": "sentence",
         "contents": "change (1 + 1) with 2.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1273,8 +1286,11 @@
       {
         "_type": "sentence",
         "contents": "Show Existentials.",
-        "responses": [
-          "Existential 1 =\n?Goal : [n : nat  IHn : 2 * sum n = n * (n + 1)\n        |- 2 + n + n + n * n + n =\n           2 + n + n + n * n + n]"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "Existential 1 =\n?Goal : [n : nat  IHn : 2 * sum n = n * (n + 1)\n        |- 2 + n + n + n * n + n =\n           2 + n + n + n * n + n]"
+          }
         ],
         "goals": [
           {
@@ -1309,7 +1325,7 @@
       {
         "_type": "sentence",
         "contents": "reflexivity.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1319,7 +1335,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ]

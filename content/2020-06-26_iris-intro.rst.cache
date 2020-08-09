@@ -1,6 +1,7 @@
 {
   "metadata": {
-    "sertop_args": []
+    "sertop_args": [],
+    "cache_version": "1"
   },
   "chunks": [
     "(* we'll use this library to set up ghost state later *)\nFrom iris.algebra Require Import lib.excl_auth.\nFrom iris.heap_lang Require Import proofmode notation.\nFrom iris.heap_lang.lib Require Import lock spin_lock.",
@@ -44,7 +45,7 @@
       {
         "_type": "sentence",
         "contents": "From iris.algebra Require Import lib.excl_auth.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -54,7 +55,7 @@
       {
         "_type": "sentence",
         "contents": "From iris.heap_lang Require Import proofmode notation.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -64,7 +65,7 @@
       {
         "_type": "sentence",
         "contents": "From iris.heap_lang.lib Require Import lock spin_lock.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -76,7 +77,7 @@
       {
         "_type": "sentence",
         "contents": "Set Default Proof Using \"Type\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -86,7 +87,7 @@
       {
         "_type": "sentence",
         "contents": "Set Printing Projections.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -96,7 +97,7 @@
       {
         "_type": "sentence",
         "contents": "Set Default Goal Selector \"!\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -106,7 +107,7 @@
       {
         "_type": "sentence",
         "contents": "Open Scope Z_scope.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -116,7 +117,7 @@
       {
         "_type": "sentence",
         "contents": "Set Warnings \"-convert_concl_no_check\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -124,7 +125,7 @@
       {
         "_type": "sentence",
         "contents": "Definition new_bank: val :=\n  \u03bb: <>,\n     let: \"a_bal\" := ref #0 in\n     let: \"b_bal\" := ref #0 in\n     let: \"lk_a\" := newlock #() in\n     let: \"lk_b\" := newlock #() in\n    (* the bank is represented as a pair of accounts, each of\n    which is a pair of a lock and a pointer to its balance *)\n     ((\"lk_a\", \"a_bal\"), (\"lk_b\", \"b_bal\")).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -132,7 +133,7 @@
       {
         "_type": "sentence",
         "contents": "Definition transfer: val :=\n  \u03bb: \"bank\" \"amt\",\n  let: \"a\" := Fst \"bank\" in\n  let: \"b\" := Snd \"bank\" in\n  acquire (Fst \"a\");;\n  acquire (Fst \"b\");;\n  Snd \"a\" <- !(Snd \"a\") - \"amt\";;\n  Snd \"b\" <- !(Snd \"b\") + \"amt\";;\n  release (Fst \"b\");;\n  release (Fst \"a\");;\n  #().",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -140,7 +141,7 @@
       {
         "_type": "sentence",
         "contents": "Definition check_consistency: val :=\n  \u03bb: \"bank\",\n  let: \"a\" := Fst \"bank\" in\n  let: \"b\" := Snd \"bank\" in\n  acquire (Fst \"a\");;\n  acquire (Fst \"b\");;\n  let: \"a_bal\" := !(Snd \"a\") in\n  let: \"b_bal\" := !(Snd \"b\") in\n  let: \"ok\" := \"a_bal\" + \"b_bal\" = #0 in\n  release (Fst \"b\");;\n  release (Fst \"a\");;\n  \"ok\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -148,7 +149,7 @@
       {
         "_type": "sentence",
         "contents": "Definition demo_check_consistency: val :=\n  \u03bb: <>,\n  let: \"bank\" := new_bank #() in\n  Fork (transfer \"bank\" #5);;\n  check_consistency \"bank\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -156,7 +157,7 @@
       {
         "_type": "sentence",
         "contents": "Section heap.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -166,7 +167,7 @@
       {
         "_type": "sentence",
         "contents": "Definition ghostR (A: ofeT) := authR (optionUR (exclR A)).",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -176,7 +177,7 @@
       {
         "_type": "sentence",
         "contents": "Context {A: ofeT} `{Hequiv: @LeibnizEquiv _ A.(ofe_equiv)} `{Hdiscrete: OfeDiscrete A}.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -186,7 +187,7 @@
       {
         "_type": "sentence",
         "contents": "Context {\u03a3} {Hin: inG \u03a3 (authR (optionUR (exclR A)))}.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -194,7 +195,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma ghost_var_alloc (a: A) :\n  \u22a2 |==> \u2203 \u03b3, own \u03b3 (\u25cfE a) \u2217 own \u03b3 (\u25efE a).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -260,7 +261,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -326,7 +327,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (own_alloc (\u25cfE a \u22c5 \u25efE a)) as (\u03b3) \"[H1 H2]\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -455,7 +456,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -521,7 +522,7 @@
       {
         "_type": "sentence",
         "contents": "apply excl_auth_valid.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -531,7 +532,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -605,7 +606,7 @@
       {
         "_type": "sentence",
         "contents": "iModIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -679,7 +680,7 @@
       {
         "_type": "sentence",
         "contents": "iExists \u03b3.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -753,7 +754,7 @@
       {
         "_type": "sentence",
         "contents": "iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -763,7 +764,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -771,7 +772,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma ghost_var_agree \u03b3 (a1 a2: A) :\n  own \u03b3 (\u25cfE a1) -\u2217 own \u03b3 (\u25efE a2) -\u2217 \u231c a1 = a2 \u231d.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -846,7 +847,7 @@
       {
         "_type": "sentence",
         "contents": "Proof using All.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -921,7 +922,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"H\u03b31 H\u03b32\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -996,7 +997,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct (own_valid_2 with \"H\u03b31 H\u03b32\") as \"H\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1071,7 +1072,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"H\" as %<-%excl_auth_agree%leibniz_equiv.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1145,7 +1146,7 @@
       {
         "_type": "sentence",
         "contents": "done.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1155,7 +1156,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1163,7 +1164,7 @@
       {
         "_type": "sentence",
         "contents": "Lemma ghost_var_update {\u03b3} (a1' a1 a2 : A) :\n  own \u03b3 (\u25cfE a1) -\u2217 own \u03b3 (\u25efE a2) -\u2217\n    |==> own \u03b3 (\u25cfE a1') \u2217 own \u03b3 (\u25efE a1').",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1239,7 +1240,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1315,7 +1316,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"H\u03b3\u25cf H\u03b3\u25ef\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1391,7 +1392,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (own_update_2 _ _ _ (\u25cfE a1' \u22c5 \u25efE a1')\n          with \"H\u03b3\u25cf H\u03b3\u25ef\") as \"[$$]\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1532,7 +1533,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1608,7 +1609,7 @@
       {
         "_type": "sentence",
         "contents": "apply excl_auth_update.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1618,7 +1619,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1694,7 +1695,7 @@
       {
         "_type": "sentence",
         "contents": "done.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1704,7 +1705,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1712,7 +1713,7 @@
       {
         "_type": "sentence",
         "contents": "End heap.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1720,7 +1721,7 @@
       {
         "_type": "sentence",
         "contents": "Section heap.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1730,7 +1731,7 @@
       {
         "_type": "sentence",
         "contents": "Context `{!heapG \u03a3}.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1740,7 +1741,7 @@
       {
         "_type": "sentence",
         "contents": "Context `{!lockG \u03a3}.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1750,7 +1751,7 @@
       {
         "_type": "sentence",
         "contents": "Context `{!inG \u03a3 (ghostR ZO)}.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1760,7 +1761,7 @@
       {
         "_type": "sentence",
         "contents": "Let N := nroot.@\"bank\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1768,7 +1769,7 @@
       {
         "_type": "sentence",
         "contents": "Definition account_inv \u03b3 bal_ref : iProp \u03a3 :=\n  \u2203 (bal: Z), bal_ref \u21a6 #bal \u2217 own \u03b3 (\u25efE bal).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1776,7 +1777,7 @@
       {
         "_type": "sentence",
         "contents": "Definition is_account (acct: val) \u03b3 : iProp \u03a3 :=\n  \u2203 (bal_ref: loc) lk,\n    \u231cacct = (lk, #bal_ref)%V\u231d \u2217\n    (* you can ignore this ghost name for the lock *)\n    \u2203 (\u03b3l: gname), is_lock \u03b3l lk (account_inv \u03b3 bal_ref).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1784,7 +1785,7 @@
       {
         "_type": "sentence",
         "contents": "Definition bank_inv (\u03b3: gname * gname) : iProp \u03a3 :=\n(* the values in the accounts are arbitrary... *)\n\u2203 (bal1 bal2: Z),\n    own \u03b3.1 (\u25cfE bal1) \u2217\n    own \u03b3.2 (\u25cfE bal2) \u2217\n    (* ... except that they add up to 0 *)\n    \u231c(bal1 + bal2)%Z = 0\u231d.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1792,7 +1793,7 @@
       {
         "_type": "sentence",
         "contents": "Definition is_bank (b: val): iProp \u03a3 :=\n  \u2203 (acct1 acct2: val) (\u03b3: gname*gname),\n  \u231cb = (acct1, acct2)%V\u231d \u2217\n  is_account acct1 \u03b3.1 \u2217\n  is_account acct2 \u03b3.2 \u2217\n  inv N (bank_inv \u03b3).",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1800,7 +1801,7 @@
       {
         "_type": "sentence",
         "contents": "Instance is_bank_Persistent b : Persistent (is_bank b).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1866,7 +1867,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -1932,7 +1933,7 @@
       {
         "_type": "sentence",
         "contents": "apply _.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -1942,7 +1943,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -1950,7 +1951,7 @@
       {
         "_type": "sentence",
         "contents": "Theorem wp_new_bank :\n  (* This is a Hoare triple using Iris's program logic. *)\n  {{{ True }}}\n    new_bank #()\n    (* the `b,` part is a shorthand for `\u2203 b, ...` in the\n    postcondition, and RET b says the function returns b. *)\n  {{{ b, RET b; is_bank b }}}.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2008,7 +2009,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2066,7 +2067,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (\u03a6) \"_ H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2132,7 +2133,7 @@
       {
         "_type": "sentence",
         "contents": "wp_rec.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2198,7 +2199,7 @@
       {
         "_type": "sentence",
         "contents": "wp_alloc a_ref as \"Ha\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2272,7 +2273,7 @@
       {
         "_type": "sentence",
         "contents": "wp_alloc b_ref as \"Hb\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2353,7 +2354,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (ghost_var_alloc (0: ZO)) as (\u03b31) \"(Hown1&H\u03b31)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2442,7 +2443,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (newlock_spec (account_inv \u03b31 a_ref)\n              with \"[Ha H\u03b31]\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2597,7 +2598,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2680,7 +2681,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -2690,7 +2691,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2773,7 +2774,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (lk_a \u03b3lk1) \"Hlk1\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2872,7 +2873,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (ghost_var_alloc (0: ZO)) as (\u03b32) \"(Hown2&H\u03b32)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -2972,7 +2973,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (newlock_spec (account_inv \u03b32 b_ref)\n              with \"[Hb H\u03b32]\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -3161,7 +3162,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -3261,7 +3262,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -3271,7 +3272,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -3371,7 +3372,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (lk_b \u03b3lk2) \"Hlk2\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -3489,8 +3490,11 @@
       {
         "_type": "sentence",
         "contents": "Print bank_inv.",
-        "responses": [
-          "bank_inv = \n\u03bb \u03b3 : gname * gname,\n  (\u2203 bal1 bal2 : Z,\n     own \u03b3.1 (\u25cfE bal1)\n     \u2217 own \u03b3.2 (\u25cfE bal2) \u2217 \u231c(bal1 + bal2)%Z = 0\u231d)%I\n     : gname * gname \u2192 iProp \u03a3"
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "bank_inv = \n\u03bb \u03b3 : gname * gname,\n  (\u2203 bal1 bal2 : Z,\n     own \u03b3.1 (\u25cfE bal1)\n     \u2217 own \u03b3.2 (\u25cfE bal2) \u2217 \u231c(bal1 + bal2)%Z = 0\u231d)%I\n     : gname * gname \u2192 iProp \u03a3"
+          }
         ],
         "goals": [
           {
@@ -3613,7 +3617,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (inv_alloc N _ (bank_inv (\u03b31,\u03b32))\n          with \"[Hown1 Hown2]\") as \"Hinv\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -3834,7 +3838,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -3950,7 +3954,7 @@
       {
         "_type": "sentence",
         "contents": "iNext.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4066,7 +4070,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _, _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4182,7 +4186,7 @@
       {
         "_type": "sentence",
         "contents": "iPureIntro; auto.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -4192,7 +4196,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4308,7 +4312,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4424,7 +4428,7 @@
       {
         "_type": "sentence",
         "contents": "iApply \"H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4540,7 +4544,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _, _, (\u03b31,\u03b32); iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4656,7 +4660,7 @@
       {
         "_type": "sentence",
         "contents": "iSplit; first eauto.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4772,7 +4776,7 @@
       {
         "_type": "sentence",
         "contents": "simpl.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -4888,7 +4892,7 @@
       {
         "_type": "sentence",
         "contents": "iSplitL \"Hlk1\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5109,7 +5113,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5225,7 +5229,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; eauto with iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -5235,7 +5239,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5351,7 +5355,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; eauto with iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -5361,7 +5365,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -5369,7 +5373,7 @@
       {
         "_type": "sentence",
         "contents": "Theorem wp_transfer b (amt: Z) :\n  {{{ is_bank b }}}\n    transfer b #amt\n  {{{ RET #(); True }}}.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5443,7 +5447,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5517,7 +5521,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (\u03a6) \"#Hb H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5599,7 +5603,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hb\" as (acct1 acct2 \u03b3 ->) \"(Hacct1&Hacct2&Hinv)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5690,7 +5694,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hacct1\" as (bal_ref1 lk1 ->) \"Hlk\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5796,7 +5800,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hlk\" as (\u03b3l1) \"Hlk1\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -5910,7 +5914,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hacct2\" as (bal_ref2 lk ->) \"Hlk\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6032,7 +6036,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hlk\" as (\u03b3l2) \"Hlk2\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6162,7 +6166,7 @@
       {
         "_type": "sentence",
         "contents": "wp_rec.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6292,7 +6296,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6422,7 +6426,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (acquire_spec with \"Hlk1\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6552,7 +6556,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"(Hlocked1&Haccount1)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6682,7 +6686,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (acquire_spec with \"Hlk2\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6812,7 +6816,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"(Hlocked2&Haccount2)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -6942,7 +6946,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Haccount1\" as (bal1) \"(Hbal1&Hown1)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7080,7 +7084,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Haccount2\" as (bal2) \"(Hbal2&Hown2)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7225,7 +7229,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures; wp_load; wp_pures; wp_store; wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7364,7 +7368,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures; wp_load; wp_pures; wp_store; wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7505,7 +7509,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite -fupd_wp.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7644,7 +7648,7 @@
       {
         "_type": "sentence",
         "contents": "iInv \"Hinv\" as (bal1' bal2') \">(H\u03b31&H\u03b32&%)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7793,7 +7797,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct (ghost_var_agree with \"H\u03b31 [$]\") as %->.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -7941,7 +7945,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct (ghost_var_agree with \"H\u03b32 [$]\") as %->.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -8088,7 +8092,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (ghost_var_update (bal1-amt)\n        with \"H\u03b31 Hown1\") as \"(H\u03b31&Hown1)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -8235,7 +8239,7 @@
       {
         "_type": "sentence",
         "contents": "iMod (ghost_var_update (bal2+amt)\n        with \"H\u03b32 Hown2\") as \"(H\u03b32&Hown2)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -8382,7 +8386,7 @@
       {
         "_type": "sentence",
         "contents": "iModIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -8529,7 +8533,7 @@
       {
         "_type": "sentence",
         "contents": "iSplitL \"H\u03b31 H\u03b32\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -8812,7 +8816,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -8959,7 +8963,7 @@
       {
         "_type": "sentence",
         "contents": "iNext.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -9106,7 +9110,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _, _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -9253,7 +9257,7 @@
       {
         "_type": "sentence",
         "contents": "iPureIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -9400,7 +9404,7 @@
       {
         "_type": "sentence",
         "contents": "lia.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -9410,7 +9414,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -9557,7 +9561,7 @@
       {
         "_type": "sentence",
         "contents": "iModIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -9706,7 +9710,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (release_spec with \"[$Hlk2 $Hlocked2 Hbal2 Hown2]\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -9989,7 +9993,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -10136,7 +10140,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -10146,7 +10150,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -10293,7 +10297,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"_\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -10440,7 +10444,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (release_spec with \"[$Hlk1 $Hlocked1 Hbal1 Hown1]\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -10723,7 +10727,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -10870,7 +10874,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -10880,7 +10884,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11027,7 +11031,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"_\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11174,7 +11178,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11321,7 +11325,7 @@
       {
         "_type": "sentence",
         "contents": "by iApply \"H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -11331,7 +11335,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -11339,7 +11343,7 @@
       {
         "_type": "sentence",
         "contents": "Theorem wp_check_consistency b :\n  {{{ is_bank b }}}\n     check_consistency b\n  {{{ RET #true; True }}}.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11405,7 +11409,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11471,7 +11475,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (\u03a6) \"#Hb H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11545,7 +11549,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hb\" as (acct1 acct2 \u03b3 ->) \"(Hacct1&Hacct2&Hinv)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11628,7 +11632,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hacct1\" as (bal_ref1 lk1 ->) \"Hlk\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11726,7 +11730,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hlk\" as (\u03b3l1) \"Hlk1\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11832,7 +11836,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hacct2\" as (bal_ref2 lk ->) \"Hlk\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -11946,7 +11950,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Hlk\" as (\u03b3l2) \"Hlk2\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12068,7 +12072,7 @@
       {
         "_type": "sentence",
         "contents": "wp_rec.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12190,7 +12194,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12312,7 +12316,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (acquire_spec with \"Hlk1\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12434,7 +12438,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"(Hlocked1&Haccount1)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12556,7 +12560,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (acquire_spec with \"Hlk2\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12678,7 +12682,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"(Hlocked2&Haccount2)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12800,7 +12804,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Haccount1\" as (bal1) \"(Hbal1&Hown1)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -12930,7 +12934,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct \"Haccount2\" as (bal2) \"(Hbal2&Hown2)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13061,7 +13065,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures; wp_load.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13192,7 +13196,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures; wp_load.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13323,7 +13327,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13454,7 +13458,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite -fupd_wp.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13585,7 +13589,7 @@
       {
         "_type": "sentence",
         "contents": "iInv N as (bal1' bal2') \">(H\u03b31 & H\u03b32 & %)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13726,7 +13730,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct (ghost_var_agree with \"H\u03b31 [$]\") as %->.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -13866,7 +13870,7 @@
       {
         "_type": "sentence",
         "contents": "iDestruct (ghost_var_agree with \"H\u03b32 [$]\") as %->.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14005,7 +14009,7 @@
       {
         "_type": "sentence",
         "contents": "iModIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14144,7 +14148,7 @@
       {
         "_type": "sentence",
         "contents": "iSplitL \"H\u03b31 H\u03b32\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14411,7 +14415,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14550,7 +14554,7 @@
       {
         "_type": "sentence",
         "contents": "iNext.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14689,7 +14693,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _, _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14828,7 +14832,7 @@
       {
         "_type": "sentence",
         "contents": "iPureIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -14967,7 +14971,7 @@
       {
         "_type": "sentence",
         "contents": "lia.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -14977,7 +14981,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -15116,7 +15120,7 @@
       {
         "_type": "sentence",
         "contents": "iModIntro.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -15255,7 +15259,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (release_spec with \"[$Hlk2 $Hlocked2 Hbal2 Hown2]\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -15522,7 +15526,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -15661,7 +15665,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -15671,7 +15675,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -15810,7 +15814,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"_\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -15949,7 +15953,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (release_spec with \"[$Hlk1 $Hlocked1 Hbal1 Hown1]\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16216,7 +16220,7 @@
       {
         "_type": "sentence",
         "contents": "{",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16355,7 +16359,7 @@
       {
         "_type": "sentence",
         "contents": "iExists _; iFrame.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -16365,7 +16369,7 @@
       {
         "_type": "sentence",
         "contents": "}",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16504,7 +16508,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"_\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16643,7 +16647,7 @@
       {
         "_type": "sentence",
         "contents": "wp_pures.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16782,7 +16786,7 @@
       {
         "_type": "sentence",
         "contents": "rewrite bool_decide_eq_true_2; last congruence.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16921,7 +16925,7 @@
       {
         "_type": "sentence",
         "contents": "by iApply \"H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -16931,7 +16935,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -16939,7 +16943,7 @@
       {
         "_type": "sentence",
         "contents": "Theorem wp_demo_check_consistency :\n  {{{ True }}}\n    demo_check_consistency #()\n  {{{ RET #true; True }}}.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -16997,7 +17001,7 @@
       {
         "_type": "sentence",
         "contents": "Proof using All.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17055,7 +17059,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (\u03a6) \"_ H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17121,7 +17125,7 @@
       {
         "_type": "sentence",
         "contents": "wp_rec.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17187,7 +17191,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply wp_new_bank; first auto.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17253,7 +17257,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros (b) \"#Hb\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17333,7 +17337,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply wp_fork.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17470,7 +17474,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17544,7 +17548,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (wp_transfer with \"Hb\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17618,7 +17622,7 @@
       {
         "_type": "sentence",
         "contents": "auto.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -17628,7 +17632,7 @@
       {
         "_type": "sentence",
         "contents": "-",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17702,7 +17706,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (wp_check_consistency with \"Hb\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17776,7 +17780,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"_\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17850,7 +17854,7 @@
       {
         "_type": "sentence",
         "contents": "by iApply \"H\u03a6\".",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -17860,7 +17864,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ],
@@ -17868,7 +17872,7 @@
       {
         "_type": "sentence",
         "contents": "Theorem wp_fork_alt (P Q: iProp \u03a3) (e e': expr) :\n  (P -\u2217 WP e {{ \u03bb _, True }}) -\u2217\n  \u2200 (\u03a6: val \u2192 iProp \u03a3), (Q -\u2217 WP e' {{ \u03a6 }}) -\u2217\n  (P \u2217 Q -\u2217 WP Fork e;; e' {{ \u03a6 }}).",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -17944,7 +17948,7 @@
       {
         "_type": "sentence",
         "contents": "Proof.",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -18020,7 +18024,7 @@
       {
         "_type": "sentence",
         "contents": "iIntros \"Hwp1\" (\u03a6) \"Hwp2 (HP&HQ)\".",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -18110,7 +18114,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (wp_fork with \"(Hwp1 HP)\").",
-        "responses": [],
+        "messages": [],
         "goals": [
           {
             "_type": "goal",
@@ -18194,7 +18198,7 @@
       {
         "_type": "sentence",
         "contents": "wp_apply (\"Hwp2\" with \"HQ\").",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -18204,7 +18208,7 @@
       {
         "_type": "sentence",
         "contents": "Qed.",
-        "responses": [],
+        "messages": [],
         "goals": []
       },
       {
@@ -18214,7 +18218,7 @@
       {
         "_type": "sentence",
         "contents": "End heap.",
-        "responses": [],
+        "messages": [],
         "goals": []
       }
     ]
