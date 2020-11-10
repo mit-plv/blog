@@ -16,11 +16,11 @@
 
    The most common approach these days for sharing proofs with readers without forcing them to run Coq is to manually copy Coq's output into source code comments — a tedious, error-prone, and brittle process.  Any text that accompanies the proof is also embedded in comments, making for a painful editing experience.
 
-   Alectryon does better: it automatically captures and interleaves Coq's output with your inputs to produce interactive webpages, and it lets you toggle between prose- and code-oriented perspectives on the same document so that you can use your favorite text editing mode for writing prose and your favorite Coq IDE for writing proofs.
+   Alectryon does better: it automatically captures and interleaves Coq's output with proof scripts to produce interactive webpages, and it lets you toggle between prose- and code-oriented perspectives on the same document so that you can use your favorite text editing mode for writing prose and your favorite Coq IDE for writing proofs.
 
 I have a talk about this `at SLE2020 <https://conf.researchr.org/details/sle-2020/sle-2020-papers/11/Untangling-mechanized-proofs>`__ on November 16th; you should join!
 
-Below, you can see three examples: in the first one I asked Alectryon to record the result of a single `Check` command.  In the second, I recorded an error message printed by Coq.  In the third, I recorded a simple proof script — try hovering or clicking on Coq sentences.  In the last, I've mixed hidden command with code to record partially constructed proof terms, a style often used to explain how tactics and holes work.
+Below, you can see three examples: in the first one I asked Alectryon to record the result of a single `Check` command.  In the second, I recorded an error message printed by Coq.  In the third, I recorded a simple proof script — try hovering or clicking on Coq sentences.  In the last, I've used hidden ``Show Proof`` commands to show how each tactic participates in constructing a proof term.
 
 .. coq::
 
@@ -65,43 +65,29 @@ Below, you can see three examples: in the first one I asked Alectryon to record 
    Qed.
    End classical. (* .none *)
 
-By the way, I wrote `an academic paper <https://doi.org/10.1145/3426425.3426940>`__ at `SLE2020 <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ (November 16) on Alectryon (`preprint <https://pit-claudel.fr/clement/papers/alectryon-SLE20.pdf>`__ since the DOI link doesn't resolve yet).  It has plenty of cool visualizations and examples, it goes into much more depth than this intro, and importantly it has all the related work, including lots of stuff on procedural vs declarative proofs.  This blog post, the paper, and the `talk <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ were all built with Alectryon and reStructuredText (a Markdown-like language).
+By the way, I wrote `an academic paper <https://doi.org/10.1145/3426425.3426940>`__ at `SLE2020 <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ (November 16) on Alectryon (`preprint on my website <https://pit-claudel.fr/clement/papers/alectryon-SLE20.pdf>`__ since the DOI link doesn't resolve yet).  It has plenty of cool visualizations and examples, it goes into much more depth than this intro, and importantly it has all the related work, including lots of stuff on procedural vs declarative proofs.  This blog post, the paper, and the `talk <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ were all built with Alectryon.
 
 If this is your first time on this blog, you might want to check the `very short tutorial on navigating these visualizations </blog/pages/how-to.html#how-to>`__ before proceeding with the rest of this post.
 
-How it works
-============
+A quick tour of Alectryon
+=========================
 
-Alectryon is a collection of mostly-independent Python modules:
+The library was written with two scenarios in mind:
 
-Interacting with Coq
---------------------
+- Making it easier to browse Coq developments (even if these developments are not written in literate style) by turning Coq source files into webpages allowing readers to replay proofs in their browser (the “Proviola” style). As a demo, I recorded goals and responses for `a <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/Core/Digits.html>`_ `complete <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/Core/Round_NE.html>`_ `build <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/Prop/Sterbenz.html>`_ of the `Flocq library <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/>`_.
 
-A ``core`` module takes a list of code snippets, feeds them to Coq through SerAPI, and records goals and messages.  This functionality is exposed on the command line (taking json as input and producing json as output) and as a Python API:
+- Writing documents mixing Coq source code and explanatory prose, either starting from a text file containing special directives (the “coqtex” and “coqrst” style, used in Coq's reference manual), or starting from a Coq file containing special comments (the “coqdoc” style, used in `CPDT <http://adam.chlipala.net/cpdt/>`_, `Software foundations <https://softwarefoundations.cis.upenn.edu>`_, etc.).
 
-.. code-block:: python
+  The Alectryon paper, this blog post, and my SLE talk are examples of the former (they are written in reStructuredText, a Markdown-like markup language); as another example, here is `a chapter from FRAP <https://alectryon-paper.github.io/bench/books/interpreters.html>`_ and `one from CPDT <https://alectryon-paper.github.io/bench/books/proof-by-reflection.html>`_, converted to reStructuredText by hand (change the URLs to ``.rst`` to see the sources).
 
-   >>> from alectryon.core import annotate
-   >>> annotate(["Example xyz (H: False): True. (* ... *) exact I. Qed.", "Print xyz."])
-   [[CoqSentence(
-        sentence='Example xyz (H: False): True.',
-        responses=[],
-        goals=[CoqGoal(name='2',
-                       conclusion='True',
-                       hypotheses=[CoqHypothesis(name='H', body=None, type='False')])]),
-     CoqText(string=' (* ... *) '),
-     CoqSentence(sentence='exact I.', responses=[], goals=[]),
-     CoqText(string=' '),
-     CoqSentence(sentence='Qed.', responses=[], goals=[])],
+  As a demo of the latter here's `a full build of Logical Foundations <https://alectryon-paper.github.io/bench/lf/>`_.
 
-    [CoqSentence(sentence='Print xyz.',
-                 responses=['xyz = fun _ : False => I\n     : False -> True'],
-             goals=[])]]
+There's no support for attaching bits of documentation to specific bits of code, like definitions, axioms, variables, etc.  As `I've written in the past <https://coq.discourse.group/t/would-coq-benefit-from-docstrings/849/3>`_, I think this is a different job (“docstrings”), ideally to be handled by Coq itself (similar to how it tracks the body and location of definitions).  Alectryon also doesn't support hyperlink Coq terms to their definitions like coqdoc can, but I plan to implement this eventually.
 
-Generating HTML
----------------
+Generating webpages
+-------------------
 
-An ``html`` module formats goals and responses as HTML, which, paired with appropriate CSS, can be explored interactively:
+Alectryon's main purpose is to record Coq's outputs and interleave them with the corresponding inputs to create an interactive webpage:
 
 .. coq::
 
@@ -486,25 +472,12 @@ Do these visualizations really help?  You be the judge: here's how the red-black
    <script src="{static}/static/libs/2020-11-09_alectryon.js" defer></script>
    <script type="text/javascript" id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-Integrating with docutils
--------------------------
-
-A ``docutils`` module integrates Alectryon into reStructuredText, making it easy to embed Coq snippets in reStructuredText documents.  This is how this blog is written, and you can easily `download the sources <https://github.com/mit-plv/blog/blob/master/content/2020-11-09_alectryon.rst>`__.  This is also how I made my `SLE2020 slides <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ (press ``p`` to see the presenter notes).
-
-Improving Coq's syntax-highlighting
------------------------------------
-
-A ``pygments`` module implements syntax-highlighting for Coq, using a database of keywords and commands extracted from the manual (Ultimately, this part should be merged upstream, and the database-generation tool should be merged into the Coq reference manual; I'll write a separate blog post about it at some point).
-
-Caching responses
------------------
-
-A ``json`` module serializes Coq's messages and responses to disk.  This is useful for caching results between runs, but also as a way to implement regression testing on documents including Coq contents.  This helps keeps code and text in sync, as it quickly catches Coq changes that affect a document: without this, when a tactic or command changes, Coq documents that include copy-pasted output will show outdated goals and messages, and Coq documents that use automatically-generated output will display goals and messages that do not match the surrounding prose.  This is a real and common problem, and in fact we have implemented workarounds in the reference manual to catch the most egregious cases (where changes caused snippets to print errors instead of executing successfully).
+Even if you don't use Alectryon's literate programming features, these webpages have one additional advantage beyond convenient browsing: because they record both your code and Coq's responses, they can serve as a permanent record of your developments immune to bitrot and suitable for archival.
 
 Editing literate Coq documents
 ------------------------------
 
-A ``literate`` module implements translations from Coq to reStructuredText and from reStructuredText to Coq.  From Coq to reST it recognizes special `(*| … |*)` comments and turns them into reStructuredText, and from reST to Coq it wraps all text except ``.. coq::`` blocks into special comments, adjusting indentation as needed.  Concretely, Alectryon knows how to convert between this:
+Besides generating webpages from standalone Coq files, Alectryon can help you write documentation, blog posts, and all sorts of other documents mixing proofs and prose.  Alectryon's ``literate`` module implements translations from Coq to reStructuredText and from reStructuredText to Coq, which allow you to toggle between two independent views of the same document: one best for editing code, and one best for editing reST prose.  Concretely, Alectryon knows how to convert between this:
 
 .. code-block:: rst
 
@@ -556,10 +529,74 @@ A ``literate`` module implements translations from Coq to reStructuredText and f
 
 Because the transformations are (essentially) inverses of each other, you don't have to pick one of these two styles and stick to it (or worse, to maintain two copies of the same document, copy-pasting snippets back and forth).  Instead, you can freely switch between using your favorite Coq IDE to write code and proofs while editing bits of prose within comments, and using your favorite reStructuredText editor to write prose.
 
-A small Emacs package (``alectryon.el``), allows you to toggle quickly between these two views.  The screenshot below demonstrates this feature: on the left is the Coq view of an edited excerpt of *Software Foundations*, in ``coq-mode``; on the right is the reST view of the same excerpt, in a ``rst-mode`` buffer.  The conversion is transparent, so editing either view updates the same ``.v`` file on disk.  Notice the highlight indicating a reStructuredText warning on both sides:
+The reason for picking reStructuredText as the markup language for comments is that it's designed with extensibility in mind, which allows me to plug Alectryon into the standard Docutils and Sphinx compilation pipelines for reStructuredText (Sphinx is what the documentations of Haskell, Agda, Coq, and Python are written in).  This is how this blog is written, and in fact you can `download the sources <https://github.com/mit-plv/blog/blob/master/content/2020-11-09_alectryon.rst>`__ if you're curious to see what it looks like.  This is also how I made my `SLE2020 slides <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ (press ``p`` to see the presenter notes) and how I wrote my SLE2020 paper.
+
+A small Emacs package (``alectryon.el``), allows you to toggle quickly between Coq and reST.  The screenshot below demonstrates this feature: on the left is the Coq view of an edited excerpt of *Software Foundations*, in ``coq-mode``; on the right is the reST view of the same excerpt, in a ``rst-mode`` buffer.  The conversion is transparent, so editing either view updates the same ``.v`` file on disk.  Notice the highlight indicating a reStructuredText warning on both sides:
 
 .. image:: {static}/static/images/alectryon_emacs-mode-screenshot.svg
    :alt: Side-by-side comparisons of Coq and reStructuredText views of the same document
+
+Alectryon's syntax-highlighting is done with Pygments, but it uses an update Coq grammar with a database of keywords and commands extracted directly from the reference manual (ultimately, this part should be merged upstream, and the database-generation tool should be merged into the Coq reference manual; I'll write a separate blog post about it at some point).
+
+Recording Coq's output and caching it
+-------------------------------------
+
+Alectryon's design is pretty modular, so if you want to use it for other purposes it's easy to use just some parts of it.  In particular, its core is a simple API that takes a list of code snippets, feeds them to Coq through SerAPI, and records goals and messages.  This functionality is exposed on the command line (taking json as input and producing json as output) and also as a Python module:
+
+.. code-block:: python
+
+   >>> from alectryon.core import annotate
+   >>> annotate(["Example xyz (H: False): True. (* ... *) exact I. Qed.", "Print xyz."])
+   [[CoqSentence(
+        sentence='Example xyz (H: False): True.',
+        responses=[],
+        goals=[CoqGoal(name='2',
+                       conclusion='True',
+                       hypotheses=[CoqHypothesis(name='H', body=None, type='False')])]),
+     CoqText(string=' (* ... *) '),
+     CoqSentence(sentence='exact I.', responses=[], goals=[]),
+     CoqText(string=' '),
+     CoqSentence(sentence='Qed.', responses=[], goals=[])],
+
+    [CoqSentence(sentence='Print xyz.',
+                 responses=['xyz = fun _ : False => I\n     : False -> True'],
+             goals=[])]]
+
+Alectryon uses JSON caches to speed up consecutive runs, but even when performance isn't a problem caches provide a very useful form of regression testing for embedded Coq snippets.  Without such tests, it's easy for seemingly innocuous changes in a library to break its documentation in subtle ways. For example, you might have the following snippet:
+
+    .. coq:: none
+
+       Module Old.
+         Fixpoint plus n m :=
+           match n with
+           | 0 => m
+           | S p => S (plus p m)
+           end.
+
+    The function ``plus`` is defined recursively:
+
+    .. coq::
+
+       Print plus.
+       End Old. (* .none *)
+
+If you rename ``plus`` to ``Nat.add`` and add a compatibility notation, this is what your documentation will silently become, with no error or warning to let you realize that something went wrong:
+
+    .. coq::
+
+       Print plus.
+
+This was such a common problem in the reference manual that we implemented workarounds to catch the most egregious cases (where changes caused snippets to print errors instead of executing successfully).  But if you check in Alectryon's caches into source control, then the following will show up pretty clearly:
+
+.. code:: diff
+
+     "contents": "Print plus.",
+     "messages": [
+       {
+         "_type": "message",
+   -     "contents": "plus = \nfix plus (n m : nat) {struct n} : nat := …"
+   +     "contents": "Notation plus := Nat.add"
+       }
 
 ----
 
@@ -567,18 +604,6 @@ All these features are exposed through a command line interface documented in `A
 
 Using Alectryon
 ===============
-
-The library was written with two scenarios in mind:
-
-- Making it easier to browse Coq developments (even if these developments are not written in literate style) by turning Coq source files into webpages allowing readers to replay proofs in their browser (the “Proviola” style). As a demo, I recorded goals and responses for `a <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/Core/Digits.html>`_ `complete <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/Core/Round_NE.html>`_ `build <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/Prop/Sterbenz.html>`_ of the `Flocq library <https://alectryon-paper.github.io/bench/flocq-3.3.1/src/>`_.
-
-- Writing documents mixing Coq source code and explanatory prose, either starting from a text file containing special directives (the “coqtex” and “coqrst” style, used in Coq's reference manual), or starting from a Coq file containing special comments (the “coqdoc” style, used in `CPDT <http://adam.chlipala.net/cpdt/>`_, `Software foundations <https://softwarefoundations.cis.upenn.edu>`_, etc.).
-
-  This blog post is an example of the former (it is written in reStructuredText); as another example, here is `a chapter from FRAP <https://alectryon-paper.github.io/bench/books/interpreters.html>`_ and `one from CPDT <https://alectryon-paper.github.io/bench/books/proof-by-reflection.html>`_ of FRAP, converted to reStructuredText by hand (change the URLs to ``.rst`` to see the sources).
-
-  As a demo of the latter here's `a full build of Logical Foundations <https://people.csail.mit.edu/cpitcla/alectryon/lf/>`_.
-
-There's no support for attaching bits of documentation to specific bits of code, like definitions, axioms, variables, etc.  As `I've written in the past <https://coq.discourse.group/t/would-coq-benefit-from-docstrings/849/3>`_, I think this is a different job (“docstrings”), ideally to be handled by Coq itself (similar to how it tracks the body and location of definitions).  It also doesn't support hyperlink Coq terms to their definitions like coqdoc can, but I plan to implement this eventually.
 
 Standalone usage
 ----------------
@@ -608,7 +633,7 @@ This is what I did for FRAP and CPDT.  For Software foundations and Flocq, I use
 Authoring tips
 ~~~~~~~~~~~~~~
 
-There's a great `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ primer on Sphinx's website, if you're new to this markup language (there's also an `official quick-reference guide <https://docutils.sourceforge.io/docs/user/rst/quickref.html>`_, which is as ugly as it is comprehensive).  reStructuredText is no panacea, but it's a decent language with a good story about extensibility, and it's popular for writing focumentation (Haskell, Agda, and Coq use it for their reference manuals).
+There's a great `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ primer on Sphinx's website, if you're new to this markup language (there's also an `official quick-reference guide <https://docutils.sourceforge.io/docs/user/rst/quickref.html>`_, which is as ugly as it is comprehensive).  reStructuredText is no panacea, but it's a decent language with a good story about extensibility, and it's popular for writing documentation (Haskell, Agda, and Coq use it for their reference manuals).
 
 If you use Emacs, you can install ``alectryon.el``, a small Emacs library that makes it easy to toggle between reStructuredText and Coq:
 
@@ -619,9 +644,9 @@ If you use Emacs, you can install ``alectryon.el``, a small Emacs library that m
 
 With this, you'll get improved rendering of `(*| … |*)` comment markers, and you'll be able to toggle between reStructuredText and Coq with a simple press of :kbd:`C-c C-S-a`.  You probably also want to ``M-x package-install flycheck`` and ``pip3 install --user docutils``, though neither of these are hard dependencies.
 
-> (Hi, reader! Are you thinking “why isn't this on MELPA?”  Great question!  It's because I haven't had the time to do it yet.  But you can — `yes <https://github.com/melpa/melpa/blob/master/README.md>`__, *you*!  In exchange, I promise I'll sing your praises every time your name comes up in conversation — I might even refer to you as ‘writer-of-MELPA-recipes extraordinaire’.
+    (Hi, reader! Are you thinking “why isn't this on MELPA?”  Great question!  It's because I haven't had the time to do it yet.  But you can — `yes <https://github.com/melpa/melpa/blob/master/README.md>`__, *you*!  In exchange, I promise I'll sing your praises every time your name comes up in conversation — I might even refer to you as ‘writer-of-MELPA-recipes extraordinaire’.
 
-> Alternatively, if you're a member of this most distinguished category of people who write more grant proposals than Emacs Lisp programs, you should drop me a line: I'm on the academic job market this year, so we should chat!)
+    Alternatively, if you're a member of this most distinguished category of people who write more grant proposals than Emacs Lisp programs, you should drop me a line: I'm on the academic job market this year, so we should chat!)
 
 Integrated into a blog or manual
 --------------------------------
@@ -656,7 +681,7 @@ As a library
 
 The choice of reStructuredText is a bit arbitrary, so it's not a hard dependency of Alectryon.  It should be relatively straightforward to combine it with other input languages (like LaTeX, Markdown, etc.) — I just haven't found the time to do it.  There's even an output mode that takes Coq fragments as input and produces individual HTML snippets for each, to make integration easier.  See `Alectryon's README <https://github.com/cpitclaudel/alectryon/>`_ for more info.
 
-As an example, I made a compatibility shim that uses Alectryon to render Coq code, responses, and goals, but calls to coqdoc to render the contents of `(** … **)` comments; look for ``coqdoc`` in file ``cli.py`` of the distribution to see how it works.
+As an example, I made a compatibility shim for Coqdoc that uses Alectryon to render Coq code, responses, and goals, but calls to coqdoc to render the contents of `(** … **)` comments; look for ``coqdoc`` in file ``cli.py`` of the distribution to see how it works.
 
 Writing Coq proofs in Coq+reST
 ==============================
@@ -788,9 +813,7 @@ Some interesting technical bits
 
 - The default HTML backend works without JavaScript — it uses only CSS.  It stores its state in checkboxes: each input line is a label for a hidden checkbox, whose state controls the visibility of the output through conditional CSS rules.  The document-wide toggle works the same way, overriding all individual checkboxes.  You can see the page without the styles by typing ``javascript:document.querySelector("link[href$=\"alectryon.css\"]").remove()`` into your address bar (all responses, goals, and checkboxes will be displayed, and you'll lose the interactivity, of course).
 
-- The design of the Coq ↔ reStructuredText translator is heavily influenced by a tool that I wrote for F* a few years ago, called `fslit <https://github.com/FStarLang/fstar-mode.el/tree/master/etc/fslit>`_.  I'm a bit partial to the F* version: there, literate comments are introduced using ``///`` markers that comment out a full line, much like literate Haskell uses ``>`` markers.  This makes it much easier to start new reST blocks, compared to relatively unwieldy `(*| … |*)` markers.
-
-  Compounding the problem is the issue that block comments in Coq are relatively complicated: parsers need to track not just nested comments but also nested strings, an oddity we inherited from OCaml (string delimiters in comments must be properly matched, and comment markers within them are ignored).  The idea there was to make commenting more robust, so that wrapping a valid bit of code in `(* … *)` would always work.  As an example, the following is valid OCaml code:
+- Block comments in Coq are relatively complicated: parsers need to track not just nested comments but also nested strings, an oddity we inherited from OCaml (string delimiters in comments must be properly matched, and comment markers within them are ignored).  The idea there was to make commenting more robust, so that wrapping a valid bit of code in `(* … *)` would always work.  As an example, the following is valid OCaml code:
 
   .. code-block:: ocaml
 
@@ -805,15 +828,15 @@ Some interesting technical bits
 
      split; (try reflexivity; intros *).
 
-  Single-line comments solve this problem nicely.  I've seen suggestions to use ``(*)`` in OCaml and Coq, but (1) it's quite unpleasant to type, (2) it'll break every editor that currently supports OCaml, and (3) it doesn't have natural variants.  In F* for example ``//`` is a regular comment and ``///`` is a literate one; in Coq `(*` is a regular comment and `(**` is a coqdoc one; what would a literate variant of ``(*)`` be? Not `(**)`, for obvious reasons, so ``(*))``?
+  Single-line comments solve this problem nicely.  I've seen suggestions to use ``(*)`` in OCaml and Coq, but (1) it's quite unpleasant to type, (2) it'll break every editor that currently supports OCaml, and (3) it doesn't have natural variants (`(*` is a regular comment and `(**` is a coqdoc one; what would a literate variant of ``(*)`` be? Not `(**)`, since that's the same as `(* *)`)
 
-  Still, single-line comments would be nice — they allow commenting out regions much more reliably, and in Alectryon's case they make the parsing/unparsing algorithms a lot simpler (it turns out that ``(*`` and ``*)`` are pretty common token in reST as well, ``(like *this*)``, so Alectryon needs to do some quoting and unquoting instead of treating all text opaquely).
+  Still, single-line comments would be nice.  A few years ago I wrote a `predecessor of Alectryon for F* <https://github.com/FStarLang/fstar-mode.el/tree/master/etc/fslit>`_, and using ``///`` for literate comments makes it much easier to start new reST blocks, compared to relatively unwieldy `(*| … |*)` markers.  As a bonus, the parsing/unparsing algorithms are a lot simpler (it turns out that ``(*`` and ``*)`` are pretty common token in reST as well, ``(like *this*)``, so Alectryon needs to do some quoting and unquoting instead of treating all text opaquely).
 
 - The conversion between Coq and reStructuredText keeps track of input positions and carries them throughout the translation, allowing it to annotate output lines with the input they came from.  I use this when compiling from Coq+reST to HTML, to map reStructuredText error messages back to the original Coq sources. Additionally, if you have Flycheck installed, the ``alectryon.el`` Emacs mode uses that to lint the reStructuredText code embedded in Alectryon comments.
 
   It actually took me a while to converge on a good design for this.  One of the requirements is that the translator should be able to keep the position of at least one point, since we want to preserve the user's position in the document when we switch.  With a rich string type this is trivial, but the string types in Python (and OCaml, and most languages really) are quite minimal.  In Emacs Lisp, for example, we'd create a “point” marker, and convert the contents of the buffer from Coq to reST or vice-versa by making insertions and deletions into it, which would move the marker around automatically.
 
-  This would work in Python too, but it would be a lot of code to maintain for a single application (including reimplementing regexp matching on top of this new structure), so instead I used a simpler type of strings annotated with position information only (in fact, for performance, these strings are just views over the original document, implemented as a string and a pair of offsets).  Then I segment the original document into a collection of these views annotated with their kind (prose or code), slice and dice them further to add or remove indentation, ‘.. coq::’ markers, or comment delimiters, and finally assemble them into a Frankenstein monster of a document, composed of fragments from the original document pieced together by a few added strings (annoyingly, having to escape comment delimiters throws an extra complication, since there's no straightforward notion of replacement for these string views (instead, unescaping ``(\ *`` to produce `(*` requires splitting `(*` into three parts, dropping the middle one, and stitching the remaining two together).
+  This would work in Python too, but it would be a lot of code to maintain for a single application (including reimplementing regex matching on top of this new structure), so instead I used a simpler type of strings annotated with position information only (in fact, for performance, these strings are just views over the original document, implemented as a string and a pair of offsets).  Then I segment the original document into a collection of these views annotated with their kind (prose or code), slice and dice them further to add or remove indentation, ‘.. coq::’ markers, or comment delimiters, and finally assemble them into a Frankenstein monster of a document, composed of fragments from the original document pieced together by a few added strings (annoyingly, having to escape comment delimiters throws an extra complication, since there's no straightforward notion of replacement for these string views (instead, unescaping ``(\ *`` to produce `(*` requires splitting `(*` into three parts, dropping the middle one, and stitching the remaining two together).
 
 - The conversion from reST to Coq tries hard to keep as few ``.. coq::`` directives as possible.  For example:
 
@@ -889,7 +912,7 @@ There are a few things that would improve the quality of the documents produced 
 
 - Adding a LaTeX backend.  This is `mostly done <https://github.com/cpitclaudel/alectryon/blob/master/alectryon/latex.py>`__.
 
-- Working on other advanced visualizations, hopefully culminating in a Coq enhancement proposal to have a standardized way to do non-textual notations (you'd attach a function to a type that says how to render it as a graph, or a LaTeX formula, or an SVG picture, or any other form of rendering).  I have early results for on this for separation logic; please get in touch if you'd like to hear more.
+- Working on other advanced visualizations, hopefully culminating in a Coq enhancement proposal to have a standardized way to do non-textual notations (you'd attach a function to a type that says how to render it as a graph, or a LaTeX formula, or an SVG picture, or any other form of rendering).  I have early results on this for separation logic; please get in touch if you'd like to hear more.
 
 - Extending the system to other languages, probably starting with Lean, F*, easyCrypt, and possibly HOL4?  It'd be interesting to see how well this generalizes.
 
@@ -903,6 +926,6 @@ There are a few things that would improve the quality of the documents produced 
 
 - Porting Coq's box layout algorithm to JavaScript, or just compiling the existing implementation with ``js_of_ocaml``, and using that to reflow code and messages when page dimensions change.  I think CSS is close to being able to support this — I know how to do ``hov`` boxes (mostly), but I'm not sure whether ``hv`` boxes can be done (and in any case, it would likely be quite slow).  It's funny that pretty-printing is a whole subfield of PL, but we've never managed to get implementers of web browsers interested.
 
-- Integrating Alectryon with CI to automatically produce annotated listing for all files in a repository.
+- Integrating Alectryon with CI to automatically produce annotated listings for all files in a repository.
 
-Let me know if you're interested on tackling one of these.  I'd love to work together or offer tips / pointers.
+Let me know if you're interested in tackling one of these.  I'd love to work together or offer tips / pointers.

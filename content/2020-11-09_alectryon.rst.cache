@@ -21,6 +21,9 @@
     "Module Raw. (* .none *)\nDefinition build_trees (leaves: list nat) :=\n  List.fold_left (fun trs n =>\n        RBT.add n (hd RBT.empty trs) :: trs)\n    leaves [] |> List.rev |> (List.map RBT.this).\nImport RBT.Raw. (* .none *)",
     "Compute build_trees [1;2;3;4;5]. (* .unfold *)\nCompute build_trees [2;1;4;3;6]. (* .unfold *)\nEnd Raw. (* .none *)",
     "End RBTExample.",
+    "Module Old.\n  Fixpoint plus n m :=\n    match n with\n    | 0 => m\n    | S p => S (plus p m)\n    end.",
+    "Print plus.\nEnd Old. (* .none *)",
+    "Print plus.",
     "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).\n\nFixpoint even (n : nat) : bool :=\n  match n with\n  | 0 => true\n  | 1 => false | S (S n) => even n\n  end.\n\nLemma even_Even : forall n, even n = true -> Even n.\n  fix IHn 1.\n  destruct n as [ | [ | ] ].\n  all: simpl.\n  all: intros.\n\n  - (* Base case: 0 *)\n    constructor.\n\n  - (* Base case: 1 *)\n    discriminate.\n\n  - (* Inductive case: [S (S _)] *)\n    constructor.\n    auto.\nQed.",
     "Lemma some_not_none : forall {A: Type} (a: A),\n          Some a = None -> False.\n  progress intros.\n  change (match Some a with\n          | Some _ => False\n          | None => True\n          end).\n  set (Some _) as s in *.\n  clearbody s.\n  match goal with\n  | [ H: ?x = _ |- context[?x] ] => rewrite H\n  end.\n  first [exact I].\n  Show Proof.\nDefined.\n\nEval compute in some_not_none.",
     "Require Import Coq.Arith.Arith.",
@@ -2860,6 +2863,64 @@
         "_type": "sentence",
         "contents": "End RBTExample.",
         "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Module Old.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint plus n m :=\n    match n with\n    | 0 => m\n    | S p => S (plus p m)\n    end.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Print plus.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "plus = \nfix plus (n m : nat) {struct n} : nat :=\n  match n with\n  | 0 => m\n  | S p => S (plus p m)\n  end\n     : nat \u2192 nat \u2192 nat\n\nArgument scopes are [nat_scope nat_scope]"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "End Old.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Print plus.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "Notation plus := Init.Nat.add"
+          }
+        ],
         "goals": []
       }
     ],
