@@ -1,0 +1,3741 @@
+{
+  "metadata": {
+    "sertop_args": [],
+    "cache_version": "1"
+  },
+  "chunks": [
+    "Check bool_ind. (* .unfold *)",
+    "Fail Check (1 + true). (* .unfold .fails *)",
+    "Require Import List. (* .none *)\nLemma rev_rev {A} (l: list A) :\n  List.rev (List.rev l) = l.\nProof.\n  induction l.\n  - (* l \u2190 [] *)\n    cbn. reflexivity.\n  - (* l \u2190 _ :: _ *)\n    cbn.\n    rewrite rev_app_distr.\n    rewrite IHl.\n    cbn. reflexivity.\nQed.",
+    "Section classical. (* .none *)\nContext (classical: forall A, A \\/ ~ A).\nExample double_negation : (forall A, ~~A -> A).\nProof.\n  intros A notnot_A.\n  Show Proof. (* .messages .unfold *)\n  destruct (classical A) as [_A | not_A].\n  Show Proof. (* .messages .unfold *)\n  - (* A holds *)\n    assumption.\n    Show Proof. (* .messages .unfold *)\n  - (* A does not hold *)\n    elim (notnot_A not_A).\n    Show Proof. (* .messages .unfold *)\nQed.\nEnd classical. (* .none *)",
+    "Require Import Coq.Unicode.Utf8 Coq.Lists.List Coq.Arith.Arith. (* .none *)\nTheorem rev_length : \u2200 l : list nat,\n    length (rev l) = length l.\nProof.\n  intros l.\n  induction l as [| n l' IHl'].\n  - (* l \u2190 [] *)\n    reflexivity.\n  - (* l \u2190 _ :: _ *)\n    simpl.\n    rewrite app_length.\n    rewrite Nat.add_comm.\n    simpl.\n    rewrite IHl'.\n    reflexivity.\nQed.\n\nCheck rev_length.",
+    "Require Export Coq.Unicode.Utf8.\nRequire Export NArith ArithRing.\n\nFixpoint nsum max f :=\n  match max with\n  | O => f 0\n  | S max' => f max + nsum max' f\n  end.\n\nModule LatexNotations.\n  Infix \"\\wedge\" := and (at level 190, right associativity).\n  Notation \"A \\Rightarrow{} B\" := (\u2200 (_ : A), B) (at level 200, right associativity).\n  Notation \"'\\ccForall{' x .. y '}{' P '}'\" := (\u2200 x, .. (\u2200 y, P) ..) (at level 200, x binder, y binder, right associativity, format \"'\\ccForall{' x .. y '}{' P '}'\").\n  Notation \"'\\ccNat{}'\" := nat.\n  Notation \"'\\ccSucc{' n '}'\" := (S n).\n  Infix \"\\times\" := mult (at level 30).\n  Notation \"\\ccNot{ x }\" := (not x) (at level 100).\n\n  Notation \"'\\ccNsum{' x '}{' max '}{' f '}'\" :=\n    (nsum max (fun x => f))\n      (format \"'\\ccNsum{' x '}{' max '}{' f '}'\").\nEnd LatexNotations.",
+    "Module Gauss. (* .none *)\nImport LatexNotations. (* .none *)\nLemma Gauss: \u2200 n, 2 * (nsum n (fun i => i)) = n * (n + 1).\nProof. (* .fold *)\n  induction n; cbn [nsum]. (* .fold *)\n  - (* n \u2190 0 *)\n    reflexivity.\n  - (* n \u2190 S _ *)\n    rewrite Mult.mult_plus_distr_l. (* .no-hyps *)\n    rewrite IHn. (* .no-hyps *)\n    ring.\nQed.\nEnd Gauss. (* .none *)",
+    "Require Coq.Numbers.Cyclic.Int63.Int63.\nRequire Coq.Lists.List.\nRequire Coq.Lists.Streams.\n\nModule GameOfLife.\n  Import Int63.\n\n  Module Type Array.\n    Axiom array: Type -> Type.\n\n    Parameter make : forall A, int -> A -> array A.\n    Arguments make {_} _ _.\n\n    Parameter get : forall A, array A -> int -> A.\n    Arguments get {_} _ _.\n\n    Parameter default : forall A, array A -> A.\n    Arguments default {_} _.\n\n    Parameter set : forall A, array A -> int -> A -> array A.\n    Arguments set {_} _ _ _.\n\n    Parameter length : forall A, array A -> int.\n    Arguments length {_} _.\n\n    Parameter copy : forall A, array A -> array A.\n    Arguments copy {_} _.\n\n    Declare Scope array_scope.\n    Delimit Scope array_scope with array.\n    Notation \"t .[ i ]\" :=\n      (get t i)\n        (at level 2, left associativity, format \"t .[ i ]\").\n    Notation \"t .[ i <- a ]\" :=\n      (set t i a)\n        (at level 2, left associativity, format \"t .[ i <- a ]\").\n\n    (* Local Open Scope int63_scope. *)\n    (* Axiom get_set_same : forall A t i (a:A), (i < length t) = true -> t.[i<-a].[i] = a. *)\n    (* Axiom get_set_other : forall A t i j (a:A), i <> j -> t.[i<-a].[j] = t.[j]. *)\n  End Array.\n\n  Import Coq.Lists.List.\n\n  Module ListArray <: Array.\n    Import ListNotations.\n\n    Record _array {A: Type} :=\n      { arr_data: list A;\n        arr_default: A }.\n    Arguments _array : clear implicits.\n    Definition array := _array.\n\n    Definition nat_of_int i := BinInt.Z.to_nat (Int63.to_Z i).\n    Definition int_of_nat n := Int63.of_Z (BinInt.Z.of_nat n).\n\n    Definition make {A: Type} (l: int) (a: A) : array A :=\n      let mk :=\n          fix mk (l: nat) {struct l} :=\n            match l with\n            | 0 => []\n            | S l => a :: mk l\n            end in\n      {| arr_data := mk (nat_of_int l);\n         arr_default := a |}.\n\n    Local Open Scope int63_scope.\n\n    Definition length {A} (x: array A) :=\n      int_of_nat (List.length x.(arr_data)).\n\n    Definition get {A} (x: array A) (i: int) :=\n      let get :=\n          fix get (l: list A) (i: int) {struct l} :=\n            match l with\n            | [] => x.(arr_default)\n            | hd :: tl =>\n              if i == 0 then hd else get tl (i - 1)\n            end in\n      get x.(arr_data) i.\n\n    Definition default {A} (x: array A) :=\n      x.(arr_default).\n\n    Definition set {A} (x: array A) (i: int) (a: A) : array A :=\n      let set :=\n          fix set (i: int) (l: list A) {struct l} :=\n            match l with\n            | [] => []\n            | hd :: tl =>\n              if i == 0 then a :: tl else hd :: set (i - 1) tl\n            end in\n      {| arr_data := set i x.(arr_data);\n         arr_default := x.(arr_default) |}.\n\n    Definition copy {A} (x: array A) : array A := x.\n\n    Declare Scope array_scope.\n    Delimit Scope array_scope with array.\n    Notation \"t .[ i ]\" :=\n      (get t i)\n        (at level 2, left associativity, format \"t .[ i ]\").\n    Notation \"t .[ i <- a ]\" :=\n      (set t i a)\n        (at level 2, left associativity, format \"t .[ i <- a ]\").\n  End ListArray.\n\n  Import ListArray.\n\n  Definition board := array (array bool).\n\n  Definition bget (b: board) x y :=\n    b.[y].[x].\n\n  Open Scope int63.\n  Import ListNotations.\n  Import Bool.\n\n  Definition bi (b: board) x y :=\n    b2i (bget b x y).\n\n  Definition neighbors (b: board) x y :=\n    [bget b (x - 1) (y - 1); bget b (x) (y - 1); bget b (x + 1) (y - 1);\n     bget b (x - 1) (y)    ; bget b (x) (y)    ; bget b (x + 1) (y)    ;\n     bget b (x - 1) (y + 1); bget b (x) (y + 1); bget b (x + 1) (y + 1)].\n\n  Definition live_neighbors (b: board) x y :=\n    bi b (x - 1) (y - 1) + bi b (x) (y - 1) + bi b (x + 1) (y - 1) +\n    bi b (x - 1) (y)     +                    bi b (x + 1) (y)     +\n    bi b (x - 1) (y + 1) + bi b (x) (y + 1) + bi b (x + 1) (y + 1).\n\n    (* List.fold_left *)\n    (*   (fun acc (x: bool) => if x then (acc + 1) else acc) *)\n    (*   (neighbors b x y) 0 *)\n\n  Definition step_one (b: board) x y :=\n    let live := live_neighbors b x y in\n    if bget b x y then\n      orb (live == 2) (live == 3)\n    else\n      (live == 3).\n\n  Definition iter {B} (n: int) (b: B) (f: int -> B -> B) :=\n    let it :=\n        fix it (fuel: nat) (idx: int) (b: B) {struct fuel} :=\n          match fuel with\n          | 0 => b\n          | S fuel => it fuel (idx - 1)%int63 (f idx b)\n          end\n    in it (nat_of_int n) (n - 1)%int63 b.\n\n  Definition make_board (sz: int) (f: int -> int -> bool) :=\n    iter sz (make sz (make sz false))\n         (fun y board =>\n            set board y\n                (iter sz (make sz false)\n                      (fun x row =>\n                         set row x (f x y)))).\n\n  Definition init (l: list (list bool)) :=\n    make_board\n      (int_of_nat (List.length l))\n      (fun x y => List.nth_default\n                 false\n                 (List.nth_default [] l (nat_of_int y))\n                 (nat_of_int x)).\n\n  Definition flatten (b: board) :=\n    List.map (fun row => row.(arr_data)) b.(arr_data).\n\n  Definition step (b: board) :=\n    make_board (length b) (step_one b).\n\n  Definition conway_life b :=\n    flatten (step (init b)).\n\n  Module Streams.\n    Import Coq.Lists.Streams.\n\n    CoFixpoint iter {A} (f: A -> A) (init: A) :=\n      Cons init (iter f (f init)).\n\n    Fixpoint take {A} (n: nat) (s: Stream A) : list A :=\n      match n with\n      | 0 => []\n      | S n => match s with\n              | Cons hd tl => hd :: take n tl\n              end\n      end.\n  End Streams.\n\n  Import Streams.\n\n  Notation \"0\" := false.\n  Notation \"1\" := true.",
+    "Definition glider := [[0;1;0;0;0];\n                      [0;0;1;0;0];\n                      [1;1;1;0;0];\n                      [0;0;0;0;0];\n                      [0;0;0;0;0]].\nCompute take 9 (iter conway_life glider). (* .unfold *)",
+    "End GameOfLife. (* .none *)",
+    "Require Coq.MSets.MSetRBT\n        Coq.Arith.Arith\n        Coq.Structures.OrderedTypeEx\n        Coq.Structures.OrdersAlt\n        Coq.Lists.List.\n\nModule RBT.\n  Import Coq.MSets.MSetRBT\n         Coq.Arith.Arith\n         Coq.Structures.OrderedTypeEx\n         Coq.Structures.OrdersAlt\n         Coq.Lists.List.\n  Import ListNotations.\n\n  Module Nat_as_OT := Update_OT Nat_as_OT.",
+    "Module RBT := MSets.MSetRBT.Make Nat_as_OT.",
+    "  Module RBTNotations.\n    Notation \"'{' ''kind':' ''node'' ; ''color':' ''' color ''' ; ''value':' ''' value ''' ; ''left':' left ; ''right':' right '}'\" :=\n      (RBT.Raw.Node color left value right)\n        (format  \"'{'  ''kind':' ''node'' ;  ''color':'  ''' color ''' ;  ''value':'  ''' value ''' ;  ''left':'  left ;  ''right':'  right  '}'\").\n\n    Notation \"'{' ''kind':' ''leaf'' '}'\" :=\n      (RBT.Raw.Leaf).\n\n    Notation \"'{' ''tree':' this '}'\" :=\n      {| RBT.this := this |}.\n  End RBTNotations.\n\n  Notation \"v |> f\" := (f v) (at level 10, only parsing).\n  Arguments List.rev {A}.",
+    "Definition build_trees (leaves: list nat) :=\n  List.fold_left (fun trs n =>\n        RBT.add n (hd RBT.empty trs) :: trs)\n    leaves [] |> List.rev.\n\nModule Pretty. (* .none *)\nImport RBTNotations. (* .none *)\nCompute build_trees [1;2;3;4;5]. (* .unfold *)\nCompute build_trees [2;1;4;3;6]. (* .unfold *)\nEnd Pretty. (* .none *)",
+    "Compute build_trees [1;2;3;4;5]. (* .unfold *)\nCompute build_trees [2;1;4;3;6]. (* .unfold *)",
+    "End RBT.",
+    "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).\n\nFixpoint even (n : nat) : bool :=\n  match n with\n  | 0 => true\n  | 1 => false | S (S n) => even n\n  end.\n\nLemma even_Even : forall n, even n = true -> Even n.\n  fix IHn 1.\n  destruct n as [ | [ | ] ].\n  all: simpl.\n  all: intros.\n\n  - (* Base case: 0 *)\n    constructor.\n\n  - (* Base case: 1 *)\n    discriminate.\n\n  - (* Inductive case: [S (S _)] *)\n    constructor.\n    auto.\nQed.",
+    "Lemma some_not_none : forall {A: Type} (a: A),\n          Some a = None -> False.\n  progress intros.\n  change (match Some a with\n          | Some _ => False\n          | None => True\n          end).\n  set (Some _) as s in *.\n  clearbody s.\n  match goal with\n  | [ H: ?x = _ |- context[?x] ] => rewrite H\n  end.\n  first [exact I].\n  Show Proof.\nDefined.\n\nEval compute in some_not_none.",
+    "Require Import Coq.Arith.Arith.",
+    "Goal True /\\ True. (* .fold *)\n  split.\n  - (* .fold *)\n    idtac \"hello\". (* .no-goals *)\n    apply I.\n  - auto.\nQed.",
+    "Compute (1 + 1). (* .unfold .messages *)"
+  ],
+  "annotated": [
+    [
+      {
+        "_type": "sentence",
+        "contents": "Check bool_ind.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "bool_ind\n     : forall P : bool -> Prop,\n       P true -> P false -> forall b : bool, P b"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Fail Check (1 + true).",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "The command has indeed failed with message:\nThe term \"true\" has type \"bool\"\nwhile it is expected to have type \"nat\"."
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold .fails *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Import List.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Lemma rev_rev {A} (l: list A) :\n  List.rev (List.rev l) = l.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev l) = l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Proof.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev l) = l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "induction l.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev nil) = nil",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev (a :: l)) = a :: l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl"
+                ],
+                "body": null,
+                "type": "rev (rev l) = l"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev nil) = nil",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* l \u2190 [] *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "cbn.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "nil = nil",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev (a :: l)) = a :: l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl"
+                ],
+                "body": null,
+                "type": "rev (rev l) = l"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* l \u2190 _ :: _ *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "cbn.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (rev l ++ a :: nil) = a :: l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl"
+                ],
+                "body": null,
+                "type": "rev (rev l) = l"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite rev_app_distr.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (a :: nil) ++ rev (rev l) = a :: l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl"
+                ],
+                "body": null,
+                "type": "rev (rev l) = l"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite IHl.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "rev (a :: nil) ++ l = a :: l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl"
+                ],
+                "body": null,
+                "type": "rev (rev l) = l"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "cbn.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "a :: l = a :: l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl"
+                ],
+                "body": null,
+                "type": "rev (rev l) = l"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Section classical.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Context (classical: forall A, A \\/ ~ A).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Example double_negation : (forall A, ~~A -> A).",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "forall A : Prop, ~ ~ A -> A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A : Prop, A \\/ ~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Proof.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "forall A : Prop, ~ ~ A -> A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A : Prop, A \\/ ~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "intros A notnot_A.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Show Proof.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "(fun (A : Prop) (notnot_A : ~ ~ A) => ?Goal)"
+          }
+        ],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .messages .unfold *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "destruct (classical A) as [_A | not_A].",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "_A"
+                ],
+                "body": null,
+                "type": "A"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "not_A"
+                ],
+                "body": null,
+                "type": "~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Show Proof.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "(fun (A : Prop) (notnot_A : ~ ~ A) =>\n let o : A \\/ ~ A := classical A in\n match o with\n | or_introl _A => ?Goal\n | or_intror not_A => ?Goal0\n end)"
+          }
+        ],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "_A"
+                ],
+                "body": null,
+                "type": "A"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "not_A"
+                ],
+                "body": null,
+                "type": "~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .messages .unfold *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "_A"
+                ],
+                "body": null,
+                "type": "A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* A holds *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "assumption.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Show Proof.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "(fun (A : Prop) (notnot_A : ~ ~ A) =>\n let o : A \\/ ~ A := classical A in\n match o with\n | or_introl _A => _A\n | or_intror not_A => ?Goal\n end)"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .messages .unfold *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "A",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "classical"
+                ],
+                "body": null,
+                "type": "forall A0 : Prop, A0 \\/ ~ A0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Prop"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "notnot_A"
+                ],
+                "body": null,
+                "type": "~ ~ A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "not_A"
+                ],
+                "body": null,
+                "type": "~ A"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* A does not hold *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "elim (notnot_A not_A).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Show Proof.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "(fun (A : Prop) (notnot_A : ~ ~ A) =>\n let o : A \\/ ~ A := classical A in\n match o with\n | or_introl _A => _A\n | or_intror not_A => False_ind A (notnot_A not_A)\n end)"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .messages .unfold *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "End classical.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Import Coq.Unicode.Utf8 Coq.Lists.List Coq.Arith.Arith.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Theorem rev_length : \u2200 l : list nat,\n    length (rev l) = length l.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\u2200 l : list nat, length (rev l) = length l",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Proof.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\u2200 l : list nat, length (rev l) = length l",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "intros l.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev l) = length l",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l"
+                ],
+                "body": null,
+                "type": "list nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "induction l as [| n l' IHl'].",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev nil) = length nil",
+            "hypotheses": []
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev (n :: l')) = length (n :: l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev nil) = length nil",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* l \u2190 [] *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev (n :: l')) = length (n :: l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* l \u2190 _ :: _ *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "simpl.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev l' ++ n :: nil) = S (length l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite app_length.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (rev l') + length (n :: nil) = S (length l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite Nat.add_comm.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "length (n :: nil) + length (rev l') = S (length l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "simpl.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "S (length (rev l')) = S (length l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite IHl'.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "S (length l') = S (length l')",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "l'"
+                ],
+                "body": null,
+                "type": "list nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHl'"
+                ],
+                "body": null,
+                "type": "length (rev l') = length l'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Check rev_length.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "rev_length\n     : \u2200 l : list nat, length (rev l) = length l"
+          }
+        ],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Export Coq.Unicode.Utf8.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Require Export NArith ArithRing.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint nsum max f :=\n  match max with\n  | O => f 0\n  | S max' => f max + nsum max' f\n  end.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module LatexNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Infix \"\\wedge\" := and (at level 190, right associativity).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"A \\Rightarrow{} B\" := (\u2200 (_ : A), B) (at level 200, right associativity).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'\\ccForall{' x .. y '}{' P '}'\" := (\u2200 x, .. (\u2200 y, P) ..) (at level 200, x binder, y binder, right associativity, format \"'\\ccForall{' x .. y '}{' P '}'\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'\\ccNat{}'\" := nat.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'\\ccSucc{' n '}'\" := (S n).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Infix \"\\times\" := mult (at level 30).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"\\ccNot{ x }\" := (not x) (at level 100).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'\\ccNsum{' x '}{' max '}{' f '}'\" :=\n    (nsum max (fun x => f))\n      (format \"'\\ccNsum{' x '}{' max '}{' f '}'\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "End LatexNotations.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Module Gauss.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import LatexNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Lemma Gauss: \u2200 n, 2 * (nsum n (fun i => i)) = n * (n + 1).",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\\ccForall{n : \\ccNat{}}{2 \\times \\ccNsum{i}{n}{i} =\n                        n \\times (n + 1)}",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Proof.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\\ccForall{n : \\ccNat{}}{2 \\times \\ccNsum{i}{n}{i} =\n                        n \\times (n + 1)}",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .fold *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "induction n; cbn [nsum].",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 \\times 0 = 0 \\times (0 + 1)",
+            "hypotheses": []
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 \\times (\\ccSucc{ n} + \\ccNsum{i}{n}{i}) =\n\\ccSucc{ n} \\times (\\ccSucc{ n} + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "\\ccNat{}"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 \\times \\ccNsum{i}{n}{i} = n \\times (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .fold *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 \\times 0 = 0 \\times (0 + 1)",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 0 *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "reflexivity.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 \\times (\\ccSucc{ n} + \\ccNsum{i}{n}{i}) =\n\\ccSucc{ n} \\times (\\ccSucc{ n} + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "\\ccNat{}"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 \\times \\ccNsum{i}{n}{i} = n \\times (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* n \u2190 S _ *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite Mult.mult_plus_distr_l.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 \\times \\ccSucc{ n} + 2 \\times \\ccNsum{i}{n}{i} =\n\\ccSucc{ n} \\times (\\ccSucc{ n} + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "\\ccNat{}"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 \\times \\ccNsum{i}{n}{i} = n \\times (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .no-hyps *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "rewrite IHn.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "2 \\times \\ccSucc{ n} + n \\times (n + 1) =\n\\ccSucc{ n} \\times (\\ccSucc{ n} + 1)",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "\\ccNat{}"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "2 \\times \\ccNsum{i}{n}{i} = n \\times (n + 1)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .no-hyps *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "ring.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "End Gauss.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Coq.Numbers.Cyclic.Int63.Int63.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Require Coq.Lists.List.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Require Coq.Lists.Streams.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module GameOfLife.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import Int63.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module Type Array.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Axiom array: Type -> Type.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Parameter make : forall A, int -> A -> array A.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments make {_} _ _.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Parameter get : forall A, array A -> int -> A.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments get {_} _ _.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Parameter default : forall A, array A -> A.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments default {_} _.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Parameter set : forall A, array A -> int -> A -> array A.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments set {_} _ _ _.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Parameter length : forall A, array A -> int.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments length {_} _.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Parameter copy : forall A, array A -> array A.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments copy {_} _.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Declare Scope array_scope.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Delimit Scope array_scope with array.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"t .[ i ]\" :=\n      (get t i)\n        (at level 2, left associativity, format \"t .[ i ]\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"t .[ i <- a ]\" :=\n      (set t i a)\n        (at level 2, left associativity, format \"t .[ i <- a ]\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    (* Local Open Scope int63_scope. *)\n    (* Axiom get_set_same : forall A t i (a:A), (i < length t) = true -> t.[i<-a].[i] = a. *)\n    (* Axiom get_set_other : forall A t i j (a:A), i <> j -> t.[i<-a].[j] = t.[j]. *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "End Array.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import Coq.Lists.List.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module ListArray <: Array.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import ListNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Record _array {A: Type} :=\n      { arr_data: list A;\n        arr_default: A }.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments _array : clear implicits.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition array := _array.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition nat_of_int i := BinInt.Z.to_nat (Int63.to_Z i).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition int_of_nat n := Int63.of_Z (BinInt.Z.of_nat n).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition make {A: Type} (l: int) (a: A) : array A :=\n      let mk :=\n          fix mk (l: nat) {struct l} :=\n            match l with\n            | 0 => []\n            | S l => a :: mk l\n            end in\n      {| arr_data := mk (nat_of_int l);\n         arr_default := a |}.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Local Open Scope int63_scope.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition length {A} (x: array A) :=\n      int_of_nat (List.length x.(arr_data)).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition get {A} (x: array A) (i: int) :=\n      let get :=\n          fix get (l: list A) (i: int) {struct l} :=\n            match l with\n            | [] => x.(arr_default)\n            | hd :: tl =>\n              if i == 0 then hd else get tl (i - 1)\n            end in\n      get x.(arr_data) i.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition default {A} (x: array A) :=\n      x.(arr_default).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition set {A} (x: array A) (i: int) (a: A) : array A :=\n      let set :=\n          fix set (i: int) (l: list A) {struct l} :=\n            match l with\n            | [] => []\n            | hd :: tl =>\n              if i == 0 then a :: tl else hd :: set (i - 1) tl\n            end in\n      {| arr_data := set i x.(arr_data);\n         arr_default := x.(arr_default) |}.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition copy {A} (x: array A) : array A := x.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Declare Scope array_scope.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Delimit Scope array_scope with array.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"t .[ i ]\" :=\n      (get t i)\n        (at level 2, left associativity, format \"t .[ i ]\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"t .[ i <- a ]\" :=\n      (set t i a)\n        (at level 2, left associativity, format \"t .[ i <- a ]\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "End ListArray.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import ListArray.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition board := array (array bool).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition bget (b: board) x y :=\n    b.[y].[x].",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Open Scope int63.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import ListNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import Bool.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition bi (b: board) x y :=\n    b2i (bget b x y).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition neighbors (b: board) x y :=\n    [bget b (x - 1) (y - 1); bget b (x) (y - 1); bget b (x + 1) (y - 1);\n     bget b (x - 1) (y)    ; bget b (x) (y)    ; bget b (x + 1) (y)    ;\n     bget b (x - 1) (y + 1); bget b (x) (y + 1); bget b (x + 1) (y + 1)].",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition live_neighbors (b: board) x y :=\n    bi b (x - 1) (y - 1) + bi b (x) (y - 1) + bi b (x + 1) (y - 1) +\n    bi b (x - 1) (y)     +                    bi b (x + 1) (y)     +\n    bi b (x - 1) (y + 1) + bi b (x) (y + 1) + bi b (x + 1) (y + 1).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    (* List.fold_left *)\n    (*   (fun acc (x: bool) => if x then (acc + 1) else acc) *)\n    (*   (neighbors b x y) 0 *)\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition step_one (b: board) x y :=\n    let live := live_neighbors b x y in\n    if bget b x y then\n      orb (live == 2) (live == 3)\n    else\n      (live == 3).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition iter {B} (n: int) (b: B) (f: int -> B -> B) :=\n    let it :=\n        fix it (fuel: nat) (idx: int) (b: B) {struct fuel} :=\n          match fuel with\n          | 0 => b\n          | S fuel => it fuel (idx - 1)%int63 (f idx b)\n          end\n    in it (nat_of_int n) (n - 1)%int63 b.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition make_board (sz: int) (f: int -> int -> bool) :=\n    iter sz (make sz (make sz false))\n         (fun y board =>\n            set board y\n                (iter sz (make sz false)\n                      (fun x row =>\n                         set row x (f x y)))).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition init (l: list (list bool)) :=\n    make_board\n      (int_of_nat (List.length l))\n      (fun x y => List.nth_default\n                 false\n                 (List.nth_default [] l (nat_of_int y))\n                 (nat_of_int x)).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition flatten (b: board) :=\n    List.map (fun row => row.(arr_data)) b.(arr_data).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition step (b: board) :=\n    make_board (length b) (step_one b).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition conway_life b :=\n    flatten (step (init b)).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module Streams.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import Coq.Lists.Streams.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "CoFixpoint iter {A} (f: A -> A) (init: A) :=\n      Cons init (iter f (f init)).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint take {A} (n: nat) (s: Stream A) : list A :=\n      match n with\n      | 0 => []\n      | S n => match s with\n              | Cons hd tl => hd :: take n tl\n              end\n      end.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "End Streams.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import Streams.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"0\" := false.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"1\" := true.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Definition glider := [[0;1;0;0;0];\n                      [0;0;1;0;0];\n                      [1;1;1;0;0];\n                      [0;0;0;0;0];\n                      [0;0;0;0;0]].",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Compute take 9 (iter conway_life glider).",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [[[0; 1; 0; 0; 0]; [0; 0; 1; 0; 0];\n        [1; 1; 1; 0; 0]; [0; 0; 0; 0; 0];\n        [0; 0; 0; 0; 0]];\n       [[0; 0; 0; 0; 0]; [1; 0; 1; 0; 0];\n       [0; 1; 1; 0; 0]; [0; 1; 0; 0; 0];\n       [0; 0; 0; 0; 0]];\n       [[0; 0; 0; 0; 0]; [0; 0; 1; 0; 0];\n       [1; 0; 1; 0; 0]; [0; 1; 1; 0; 0];\n       [0; 0; 0; 0; 0]];\n       [[0; 0; 0; 0; 0]; [0; 1; 0; 0; 0];\n       [0; 0; 1; 1; 0]; [0; 1; 1; 0; 0];\n       [0; 0; 0; 0; 0]];\n       [[0; 0; 0; 0; 0]; [0; 0; 1; 0; 0];\n       [0; 0; 0; 1; 0]; [0; 1; 1; 1; 0];\n       [0; 0; 0; 0; 0]];\n       [[0; 0; 0; 0; 0]; [0; 0; 0; 0; 0];\n       [0; 1; 0; 1; 0]; [0; 0; 1; 1; 0];\n       [0; 0; 1; 0; 0]];\n       [[0; 0; 0; 0; 0]; [0; 0; 0; 0; 0];\n       [0; 0; 0; 1; 0]; [0; 1; 0; 1; 0];\n       [0; 0; 1; 1; 0]];\n       [[0; 0; 0; 0; 0]; [0; 0; 0; 0; 0];\n       [0; 0; 1; 0; 0]; [0; 0; 0; 1; 1];\n       [0; 0; 1; 1; 0]];\n       [[0; 0; 0; 0; 0]; [0; 0; 0; 0; 0];\n       [0; 0; 0; 1; 0]; [0; 0; 0; 0; 1];\n       [0; 0; 1; 1; 1]]]\n     : list (list (list bool))"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "End GameOfLife.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Coq.MSets.MSetRBT\n        Coq.Arith.Arith\n        Coq.Structures.OrderedTypeEx\n        Coq.Structures.OrdersAlt\n        Coq.Lists.List.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module RBT.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import Coq.MSets.MSetRBT\n         Coq.Arith.Arith\n         Coq.Structures.OrderedTypeEx\n         Coq.Structures.OrdersAlt\n         Coq.Lists.List.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import ListNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module Nat_as_OT := Update_OT Nat_as_OT.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Module RBT := MSets.MSetRBT.Make Nat_as_OT.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "text",
+        "contents": "  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module RBTNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'{' ''kind':' ''node'' ; ''color':' ''' color ''' ; ''value':' ''' value ''' ; ''left':' left ; ''right':' right '}'\" :=\n      (RBT.Raw.Node color left value right)\n        (format  \"'{'  ''kind':' ''node'' ;  ''color':'  ''' color ''' ;  ''value':'  ''' value ''' ;  ''left':'  left ;  ''right':'  right  '}'\").",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'{' ''kind':' ''leaf'' '}'\" :=\n      (RBT.Raw.Leaf).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"'{' ''tree':' this '}'\" :=\n      {| RBT.this := this |}.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "End RBTNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Notation \"v |> f\" := (f v) (at level 10, only parsing).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Arguments List.rev {A}.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Definition build_trees (leaves: list nat) :=\n  List.fold_left (fun trs n =>\n        RBT.add n (hd RBT.empty trs) :: trs)\n    leaves [] |> List.rev.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Module Pretty.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import RBTNotations.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Compute build_trees [1;2;3;4;5].",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [{ 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind':'node'; 'color': 'Red'; 'value': '2'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Black'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Black'; 'value': '3'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Black'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Black'; 'value': '3'; 'left': { 'kind': 'leaf' }; 'right': { 'kind':'node'; 'color': 'Red'; 'value': '4'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Black'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Red'; 'value': '4'; 'left': { 'kind':'node'; 'color': 'Black'; 'value': '3'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Black'; 'value': '5'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } } }}]\n     : list RBT.t"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Compute build_trees [2;1;4;3;6].",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [{ 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Red'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind': 'leaf' } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Red'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Red'; 'value': '4'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '3'; 'left': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Red'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Black'; 'value': '4'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } }};\n       { 'tree': { 'kind':'node'; 'color': 'Black'; 'value': '3'; 'left': { 'kind':'node'; 'color': 'Black'; 'value': '2'; 'left': { 'kind':'node'; 'color': 'Red'; 'value': '1'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind': 'leaf' } }; 'right': { 'kind':'node'; 'color': 'Black'; 'value': '4'; 'left': { 'kind': 'leaf' }; 'right': { 'kind':'node'; 'color': 'Red'; 'value': '6'; 'left': { 'kind': 'leaf' }; 'right': { 'kind': 'leaf' } } } }}]\n     : list RBT.t"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "End Pretty.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Compute build_trees [1;2;3;4;5].",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [{|\n        RBT.this := RBT.Raw.Node Black RBT.Raw.Leaf 1\n                      RBT.Raw.Leaf;\n        RBT.is_ok := RBT.Raw.add_ok RBT.Raw.Leaf 1 |};\n       {|\n       RBT.this := RBT.Raw.Node Black RBT.Raw.Leaf 1\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 2\n                        RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black RBT.Raw.Leaf\n                         1 RBT.Raw.Leaf) 2 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        1 RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        3 RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black RBT.Raw.Leaf\n                         1\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 2\n                            RBT.Raw.Leaf)) 3 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        1 RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        3\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           4 RBT.Raw.Leaf));\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 3\n                            RBT.Raw.Leaf)) 4 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        1 RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Red\n                        (RBT.Raw.Node Black\n                           RBT.Raw.Leaf 3 RBT.Raw.Leaf)\n                        4\n                        (RBT.Raw.Node Black\n                           RBT.Raw.Leaf 5 RBT.Raw.Leaf));\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 3\n                            (RBT.Raw.Node Red\n                               RBT.Raw.Leaf 4\n                               RBT.Raw.Leaf))) 5 |}]\n     : list RBT.t"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Compute build_trees [2;1;4;3;6].",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = [{|\n        RBT.this := RBT.Raw.Node Black RBT.Raw.Leaf 2\n                      RBT.Raw.Leaf;\n        RBT.is_ok := RBT.Raw.add_ok RBT.Raw.Leaf 2 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 1\n                        RBT.Raw.Leaf) 2 RBT.Raw.Leaf;\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black RBT.Raw.Leaf\n                         2 RBT.Raw.Leaf) 1 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 1\n                        RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 4\n                        RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         RBT.Raw.Leaf) 4 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           1 RBT.Raw.Leaf) 2\n                        RBT.Raw.Leaf) 3\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        4 RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 4\n                            RBT.Raw.Leaf)) 3 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           1 RBT.Raw.Leaf) 2\n                        RBT.Raw.Leaf) 3\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        4\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           6 RBT.Raw.Leaf));\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Black\n                            (RBT.Raw.Node Red\n                               RBT.Raw.Leaf 1\n                               RBT.Raw.Leaf) 2\n                            RBT.Raw.Leaf) 3\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 4\n                            RBT.Raw.Leaf)) 6 |}]\n     : list RBT.t"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "End RBT.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Fixpoint even (n : nat) : bool :=\n  match n with\n  | 0 => true\n  | 1 => false | S (S n) => even n\n  end.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Lemma even_Even : forall n, even n = true -> Even n.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\u2200 n : nat, even n = true \u2192 Even n",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "fix IHn 1.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\u2200 n : nat, even n = true \u2192 Even n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "destruct n as [ | [ | ] ].",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even 0 = true \u2192 Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even 1 = true \u2192 Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even (S (S n)) = true \u2192 Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n0 : nat, even n0 = true \u2192 Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: simpl.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "true = true \u2192 Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "false = true \u2192 Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "even n = true \u2192 Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n0 : nat, even n0 = true \u2192 Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "all: intros.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "true = true"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "false = true"
+              }
+            ]
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n0 : nat, even n0 = true \u2192 Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "even n = true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even 0",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "true = true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* Base case: 0 *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "constructor.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even 1",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n : nat, even n = true \u2192 Even n"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "false = true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* Base case: 1 *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "discriminate.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even (S (S n))",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n0 : nat, even n0 = true \u2192 Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "even n = true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* Inductive case: [S (S _)] *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "constructor.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "Even n",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "IHn"
+                ],
+                "body": null,
+                "type": "\u2200 n0 : nat, even n0 = true \u2192 Even n0"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "n"
+                ],
+                "body": null,
+                "type": "nat"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "even n = true"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "auto.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Lemma some_not_none : forall {A: Type} (a: A),\n          Some a = None -> False.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "\u2200 (A : Type) (a : A), Some a = None \u2192 False",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "progress intros.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "False",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "Some a = None"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "change (match Some a with\n          | Some _ => False\n          | None => True\n          end).",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "match Some a with\n| Some _ => False\n| None => True\nend",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "Some a = None"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "set (Some _) as s in *.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "match s with\n| Some _ => False\n| None => True\nend",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "s"
+                ],
+                "body": "Some a",
+                "type": "option A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "s = None"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "clearbody s.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "match s with\n| Some _ => False\n| None => True\nend",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "s"
+                ],
+                "body": null,
+                "type": "option A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "s = None"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "match goal with\n  | [ H: ?x = _ |- context[?x] ] => rewrite H\n  end.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True",
+            "hypotheses": [
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "A"
+                ],
+                "body": null,
+                "type": "Type"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "a"
+                ],
+                "body": null,
+                "type": "A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "s"
+                ],
+                "body": null,
+                "type": "option A"
+              },
+              {
+                "_type": "hypothesis",
+                "names": [
+                  "H"
+                ],
+                "body": null,
+                "type": "s = None"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "first [exact I].",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "Show Proof.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "(\u03bb (A : Type) (a : A) (H : Some a = None),\n   let s := Some a in\n   eq_ind_r\n     (\u03bb s0 : option A,\n        match s0 with\n        | Some _ => False\n        | None => True\n        end) I H)"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Defined.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Eval compute in some_not_none.",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = \u03bb (a : ?A) (H : Some a = None),\n         match\n           match H in (_ = y) return (y = Some a) with\n           | eq_refl => eq_refl\n           end in (_ = y)\n           return\n             match y with\n             | Some _ => False\n             | None => True\n             end\n         with\n         | eq_refl => I\n         end\n     : \u2200 a : ?A, Some a = None \u2192 False"
+          }
+        ],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Require Import Coq.Arith.Arith.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Goal True /\\ True.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True \u2227 True",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .fold *)\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "split.",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True",
+            "hypotheses": []
+          },
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .fold *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "idtac \"hello\".",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "hello"
+          }
+        ],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " (* .no-goals *)\n    "
+      },
+      {
+        "_type": "sentence",
+        "contents": "apply I.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n  "
+      },
+      {
+        "_type": "sentence",
+        "contents": "-",
+        "messages": [],
+        "goals": [
+          {
+            "_type": "goal",
+            "name": null,
+            "conclusion": "True",
+            "hypotheses": []
+          }
+        ]
+      },
+      {
+        "_type": "text",
+        "contents": " "
+      },
+      {
+        "_type": "sentence",
+        "contents": "auto.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Qed.",
+        "messages": [],
+        "goals": []
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
+        "contents": "Compute (1 + 1).",
+        "messages": [
+          {
+            "_type": "message",
+            "contents": "     = 2\n     : nat"
+          }
+        ],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .unfold .messages *)"
+      }
+    ]
+  ]
+}

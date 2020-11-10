@@ -1,0 +1,99 @@
+mjx-container,
+.MJXc-display,
+.MJXp-display,
+.MathJax_Display,
+.MathJax_Preview,
+.MathJax_SVG_Display,
+.MathJax_SVG_Preview,
+.MathJax_PHTML_Display,
+.MathJax_PHTML_Preview,
+.MathJax_MathML {
+    margin: 0 !important;
+}
+
+/****************/
+/* Game of life */
+/****************/
+
+.conway-snapshot {
+    display: inline-block;
+    margin: 0.35rem 0.25rem 0.35rem 0.75rem;
+}
+
+.conway-snapshot svg {
+    vertical-align: middle;
+}
+
+.conway-snapshot::after {
+    width: 0;
+    display: inline-block;
+}
+
+.conway-snapshot:not(:last-child)::after {
+    content: ';';
+}
+
+.conway-snapshot:last-child::after {
+    content: " ";
+}
+
+.conway-wrapper {
+    text-align: center;
+}
+
+.conway-sequence {
+    display: inline-block;
+    margin-left: -0.5rem;
+}
+
+.conway-annot {
+    white-space: nowrap;
+}
+
+
+/*******/
+/* RBT */
+/*******/
+
+.coq-rbt-raw .coq-message {
+  max-height: 10rem;
+  overflow: auto;
+}
+
+.rbt-graph {
+    margin: 0.35rem 0.1rem 0.35rem 0.5rem;
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 20pt;
+}
+
+.rbt-graph svg {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.rbt-graph::after {
+    width: 0;
+    display: inline-block;
+}
+
+.rbt-graph:not(:last-child)::after {
+    content: ';';
+}
+
+.rbt-graph:last-child::after {
+    content: " ";
+}
+
+.rbt-wrapper {
+    text-align: center;
+}
+
+.rbt-sequence {
+    display: inline-block;
+    margin-left: -0.4rem;
+}
+
+.rbt-annot {
+    white-space: nowrap;
+}
