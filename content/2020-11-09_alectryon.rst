@@ -72,470 +72,498 @@ If this is your first time on this blog, you might want to check the `very short
 How it works
 ============
 
-Alectryon is a collection of mostly-independent tools:
+Alectryon is a collection of mostly-independent Python modules:
 
-- A ``core`` module takes a list of code snippets, feeds them to Coq through SerAPI, and records goals and messages.  This functionality is exposed on the command line (taking json as input and producing json as output) and as a Python API:
+Interacting with Coq
+--------------------
 
-  .. code-block:: python
+A ``core`` module takes a list of code snippets, feeds them to Coq through SerAPI, and records goals and messages.  This functionality is exposed on the command line (taking json as input and producing json as output) and as a Python API:
 
-     >>> from alectryon.core import annotate
-     >>> annotate(["Example xyz (H: False): True. (* ... *) exact I. Qed.", "Print xyz."])
-     [[CoqSentence(
-          sentence='Example xyz (H: False): True.',
-          responses=[],
-          goals=[CoqGoal(name='2',
-                         conclusion='True',
-                         hypotheses=[CoqHypothesis(name='H', body=None, type='False')])]),
-       CoqText(string=' (* ... *) '),
-       CoqSentence(sentence='exact I.', responses=[], goals=[]),
-       CoqText(string=' '),
-       CoqSentence(sentence='Qed.', responses=[], goals=[])],
+.. code-block:: python
 
-      [CoqSentence(sentence='Print xyz.',
-                   responses=['xyz = fun _ : False => I\n     : False -> True'],
-               goals=[])]]
+   >>> from alectryon.core import annotate
+   >>> annotate(["Example xyz (H: False): True. (* ... *) exact I. Qed.", "Print xyz."])
+   [[CoqSentence(
+        sentence='Example xyz (H: False): True.',
+        responses=[],
+        goals=[CoqGoal(name='2',
+                       conclusion='True',
+                       hypotheses=[CoqHypothesis(name='H', body=None, type='False')])]),
+     CoqText(string=' (* ... *) '),
+     CoqSentence(sentence='exact I.', responses=[], goals=[]),
+     CoqText(string=' '),
+     CoqSentence(sentence='Qed.', responses=[], goals=[])],
 
-- An ``html`` module formats goals and responses as HTML, which, paired with appropriate CSS, can be explored interactively:
+    [CoqSentence(sentence='Print xyz.',
+                 responses=['xyz = fun _ : False => I\n     : False -> True'],
+             goals=[])]]
 
-  .. coq::
+Generating HTML
+---------------
 
-     Require Import Coq.Unicode.Utf8 Coq.Lists.List Coq.Arith.Arith. (* .none *)
-     Theorem rev_length : ∀ l : list nat,
-         length (rev l) = length l.
-     Proof.
-       intros l.
-       induction l as [| n l' IHl'].
-       - (* l ← [] *)
-         reflexivity.
-       - (* l ← _ :: _ *)
-         simpl.
-         rewrite app_length.
-         rewrite Nat.add_comm.
-         simpl.
-         rewrite IHl'.
-         reflexivity.
-     Qed.
+An ``html`` module formats goals and responses as HTML, which, paired with appropriate CSS, can be explored interactively:
 
-     Check rev_length.
+.. coq::
 
-  Because this is an interactive webpage, we can apply all sorts of post-processing to the output.
+   Require Import Coq.Unicode.Utf8 Coq.Lists.List Coq.Arith.Arith. (* .none *)
+   Theorem rev_length : ∀ l : list nat,
+       length (rev l) = length l.
+   Proof.
+     intros l.
+     induction l as [| n l' IHl'].
+     - (* l ← [] *)
+       reflexivity.
+     - (* l ← _ :: _ *)
+       simpl.
+       rewrite app_length.
+       rewrite Nat.add_comm.
+       simpl.
+       rewrite IHl'.
+       reflexivity.
+   Qed.
 
-  + First, let's use MathJax to make a math proof a bit more readable:
+   Check rev_length.
 
-    .. raw:: html
+Because this is an interactive webpage, we can apply all sorts of post-processing to the output, like using MathJax to make a math proof a bit more readable:
 
-       <div style="display: none">
-           \(\newcommand{\ccQ}{\mathbb{Q}}\)
-           \(\newcommand{\ccNat}{\mathbb{N}}\)
-           \(\newcommand{\ccSucc}[1]{\mathrm{S}\:#1}\)
-           \(\newcommand{\ccFrac}[2]{\frac{#1}{#2}}\)
-           \(\newcommand{\ccPow}[2]{{#1}^{#2}}\)
-           \(\newcommand{\ccNot}[1]{{\lnot #1}}\)
-           \(\newcommand{\ccEvar}[1]{\textit{\texttt{#1}}}\)
-           \(\newcommand{\ccForall}[2]{\forall \: #1. \; #2}\)
-           \(\newcommand{\ccNsum}[3]{\sum_{#1 = 0}^{#2} #3}\)
-       </div>
+.. raw:: html
 
-    .. coq:: none
+   <div style="display: none">
+       \(\newcommand{\ccQ}{\mathbb{Q}}\)
+       \(\newcommand{\ccNat}{\mathbb{N}}\)
+       \(\newcommand{\ccSucc}[1]{\mathrm{S}\:#1}\)
+       \(\newcommand{\ccFrac}[2]{\frac{#1}{#2}}\)
+       \(\newcommand{\ccPow}[2]{{#1}^{#2}}\)
+       \(\newcommand{\ccNot}[1]{{\lnot #1}}\)
+       \(\newcommand{\ccEvar}[1]{\textit{\texttt{#1}}}\)
+       \(\newcommand{\ccForall}[2]{\forall \: #1. \; #2}\)
+       \(\newcommand{\ccNsum}[3]{\sum_{#1 = 0}^{#2} #3}\)
+   </div>
 
-       Require Export Coq.Unicode.Utf8.
-       Require Export NArith ArithRing.
+.. coq:: none
 
-       Fixpoint nsum max f :=
-         match max with
-         | O => f 0
-         | S max' => f max + nsum max' f
-         end.
+   Require Export Coq.Unicode.Utf8.
+   Require Export NArith ArithRing.
 
-       Module LatexNotations.
-         Infix "\wedge" := and (at level 190, right associativity).
-         Notation "A \Rightarrow{} B" := (∀ (_ : A), B) (at level 200, right associativity).
-         Notation "'\ccForall{' x .. y '}{' P '}'" := (∀ x, .. (∀ y, P) ..) (at level 200, x binder, y binder, right associativity, format "'\ccForall{' x .. y '}{' P '}'").
-         Notation "'\ccNat{}'" := nat.
-         Notation "'\ccSucc{' n '}'" := (S n).
-         Infix "\times" := mult (at level 30).
-         Notation "\ccNot{ x }" := (not x) (at level 100).
+   Fixpoint nsum max f :=
+     match max with
+     | O => f 0
+     | S max' => f max + nsum max' f
+     end.
 
-         Notation "'\ccNsum{' x '}{' max '}{' f '}'" :=
-           (nsum max (fun x => f))
-             (format "'\ccNsum{' x '}{' max '}{' f '}'").
-       End LatexNotations.
+   Module LatexNotations.
+     Infix "\wedge" := and (at level 190, right associativity).
+     Notation "A \Rightarrow{} B" := (∀ (_ : A), B) (at level 200, right associativity).
+     Notation "'\ccForall{' x .. y '}{' P '}'" := (∀ x, .. (∀ y, P) ..) (at level 200, x binder, y binder, right associativity, format "'\ccForall{' x .. y '}{' P '}'").
+     Notation "'\ccNat{}'" := nat.
+     Notation "'\ccSucc{' n '}'" := (S n).
+     Infix "\times" := mult (at level 30).
+     Notation "\ccNot{ x }" := (not x) (at level 100).
 
-    .. container:: coq-mathjax
+     Notation "'\ccNsum{' x '}{' max '}{' f '}'" :=
+       (nsum max (fun x => f))
+         (format "'\ccNsum{' x '}{' max '}{' f '}'").
+   End LatexNotations.
 
-       .. coq:: unfold
+.. container:: coq-mathjax
 
-          Module Gauss. (* .none *)
-          Import LatexNotations. (* .none *)
-          Lemma Gauss: ∀ n, 2 * (nsum n (fun i => i)) = n * (n + 1).
-          Proof. (* .fold *)
-            induction n; cbn [nsum]. (* .fold *)
-            - (* n ← 0 *)
-              reflexivity.
-            - (* n ← S _ *)
-              rewrite Mult.mult_plus_distr_l. (* .no-hyps *)
-              rewrite IHn. (* .no-hyps *)
-              ring.
-          Qed.
-          End Gauss. (* .none *)
+   .. coq:: unfold
 
-  + Next, let's use the browser's native support for vector graphics to render Game of Life boards encoded as lists of Booleans into small images:
+      Module Gauss. (* .none *)
+      Import LatexNotations. (* .none *)
+      Lemma Gauss: ∀ n, 2 * (nsum n (fun i => i)) = n * (n + 1).
+      Proof. (* .fold *)
+        induction n; cbn [nsum]. (* .fold *)
+        - (* n ← 0 *)
+          reflexivity.
+        - (* n ← S _ *)
+          rewrite Mult.mult_plus_distr_l. (* .no-hyps *)
+          rewrite IHn. (* .no-hyps *)
+          ring.
+      Qed.
+      End Gauss. (* .none *)
 
-    .. coq:: none
+… or using the browser's native support for vector graphics to render *Game of Life* boards encoded as lists of Booleans into small images:
 
-       Require Coq.Numbers.Cyclic.Int63.Int63.
-       Require Coq.Lists.List.
-       Require Coq.Lists.Streams.
+.. coq:: none
 
-       Module GameOfLife.
-         Import Int63.
+   Require Coq.Numbers.Cyclic.Int63.Int63.
+   Require Coq.Lists.List.
+   Require Coq.Lists.Streams.
 
-         Module Type Array.
-           Axiom array: Type -> Type.
+   Module GameOfLife.
+     Import Int63.
 
-           Parameter make : forall A, int -> A -> array A.
-           Arguments make {_} _ _.
+     Module Type Array.
+       Axiom array: Type -> Type.
 
-           Parameter get : forall A, array A -> int -> A.
-           Arguments get {_} _ _.
+       Parameter make : forall A, int -> A -> array A.
+       Arguments make {_} _ _.
 
-           Parameter default : forall A, array A -> A.
-           Arguments default {_} _.
+       Parameter get : forall A, array A -> int -> A.
+       Arguments get {_} _ _.
 
-           Parameter set : forall A, array A -> int -> A -> array A.
-           Arguments set {_} _ _ _.
+       Parameter default : forall A, array A -> A.
+       Arguments default {_} _.
 
-           Parameter length : forall A, array A -> int.
-           Arguments length {_} _.
+       Parameter set : forall A, array A -> int -> A -> array A.
+       Arguments set {_} _ _ _.
 
-           Parameter copy : forall A, array A -> array A.
-           Arguments copy {_} _.
+       Parameter length : forall A, array A -> int.
+       Arguments length {_} _.
 
-           Declare Scope array_scope.
-           Delimit Scope array_scope with array.
-           Notation "t .[ i ]" :=
-             (get t i)
-               (at level 2, left associativity, format "t .[ i ]").
-           Notation "t .[ i <- a ]" :=
-             (set t i a)
-               (at level 2, left associativity, format "t .[ i <- a ]").
+       Parameter copy : forall A, array A -> array A.
+       Arguments copy {_} _.
 
-           (* Local Open Scope int63_scope. *)
-           (* Axiom get_set_same : forall A t i (a:A), (i < length t) = true -> t.[i<-a].[i] = a. *)
-           (* Axiom get_set_other : forall A t i j (a:A), i <> j -> t.[i<-a].[j] = t.[j]. *)
-         End Array.
+       Declare Scope array_scope.
+       Delimit Scope array_scope with array.
+       Notation "t .[ i ]" :=
+         (get t i)
+           (at level 2, left associativity, format "t .[ i ]").
+       Notation "t .[ i <- a ]" :=
+         (set t i a)
+           (at level 2, left associativity, format "t .[ i <- a ]").
 
-         Import Coq.Lists.List.
+       (* Local Open Scope int63_scope. *)
+       (* Axiom get_set_same : forall A t i (a:A), (i < length t) = true -> t.[i<-a].[i] = a. *)
+       (* Axiom get_set_other : forall A t i j (a:A), i <> j -> t.[i<-a].[j] = t.[j]. *)
+     End Array.
 
-         Module ListArray <: Array.
-           Import ListNotations.
+     Import Coq.Lists.List.
 
-           Record _array {A: Type} :=
-             { arr_data: list A;
-               arr_default: A }.
-           Arguments _array : clear implicits.
-           Definition array := _array.
+     Module ListArray <: Array.
+       Import ListNotations.
 
-           Definition nat_of_int i := BinInt.Z.to_nat (Int63.to_Z i).
-           Definition int_of_nat n := Int63.of_Z (BinInt.Z.of_nat n).
+       Record _array {A: Type} :=
+         { arr_data: list A;
+           arr_default: A }.
+       Arguments _array : clear implicits.
+       Definition array := _array.
 
-           Definition make {A: Type} (l: int) (a: A) : array A :=
-             let mk :=
-                 fix mk (l: nat) {struct l} :=
-                   match l with
-                   | 0 => []
-                   | S l => a :: mk l
-                   end in
-             {| arr_data := mk (nat_of_int l);
-                arr_default := a |}.
+       Definition nat_of_int i := BinInt.Z.to_nat (Int63.to_Z i).
+       Definition int_of_nat n := Int63.of_Z (BinInt.Z.of_nat n).
 
-           Local Open Scope int63_scope.
+       Definition make {A: Type} (l: int) (a: A) : array A :=
+         let mk :=
+             fix mk (l: nat) {struct l} :=
+               match l with
+               | 0 => []
+               | S l => a :: mk l
+               end in
+         {| arr_data := mk (nat_of_int l);
+            arr_default := a |}.
 
-           Definition length {A} (x: array A) :=
-             int_of_nat (List.length x.(arr_data)).
+       Local Open Scope int63_scope.
 
-           Definition get {A} (x: array A) (i: int) :=
-             let get :=
-                 fix get (l: list A) (i: int) {struct l} :=
-                   match l with
-                   | [] => x.(arr_default)
-                   | hd :: tl =>
-                     if i == 0 then hd else get tl (i - 1)
-                   end in
-             get x.(arr_data) i.
+       Definition length {A} (x: array A) :=
+         int_of_nat (List.length x.(arr_data)).
 
-           Definition default {A} (x: array A) :=
-             x.(arr_default).
+       Definition get {A} (x: array A) (i: int) :=
+         let get :=
+             fix get (l: list A) (i: int) {struct l} :=
+               match l with
+               | [] => x.(arr_default)
+               | hd :: tl =>
+                 if i == 0 then hd else get tl (i - 1)
+               end in
+         get x.(arr_data) i.
 
-           Definition set {A} (x: array A) (i: int) (a: A) : array A :=
-             let set :=
-                 fix set (i: int) (l: list A) {struct l} :=
-                   match l with
-                   | [] => []
-                   | hd :: tl =>
-                     if i == 0 then a :: tl else hd :: set (i - 1) tl
-                   end in
-             {| arr_data := set i x.(arr_data);
-                arr_default := x.(arr_default) |}.
+       Definition default {A} (x: array A) :=
+         x.(arr_default).
 
-           Definition copy {A} (x: array A) : array A := x.
+       Definition set {A} (x: array A) (i: int) (a: A) : array A :=
+         let set :=
+             fix set (i: int) (l: list A) {struct l} :=
+               match l with
+               | [] => []
+               | hd :: tl =>
+                 if i == 0 then a :: tl else hd :: set (i - 1) tl
+               end in
+         {| arr_data := set i x.(arr_data);
+            arr_default := x.(arr_default) |}.
 
-           Declare Scope array_scope.
-           Delimit Scope array_scope with array.
-           Notation "t .[ i ]" :=
-             (get t i)
-               (at level 2, left associativity, format "t .[ i ]").
-           Notation "t .[ i <- a ]" :=
-             (set t i a)
-               (at level 2, left associativity, format "t .[ i <- a ]").
-         End ListArray.
+       Definition copy {A} (x: array A) : array A := x.
 
-         Import ListArray.
+       Declare Scope array_scope.
+       Delimit Scope array_scope with array.
+       Notation "t .[ i ]" :=
+         (get t i)
+           (at level 2, left associativity, format "t .[ i ]").
+       Notation "t .[ i <- a ]" :=
+         (set t i a)
+           (at level 2, left associativity, format "t .[ i <- a ]").
+     End ListArray.
 
-         Definition board := array (array bool).
+     Import ListArray.
 
-         Definition bget (b: board) x y :=
-           b.[y].[x].
+     Definition board := array (array bool).
 
-         Open Scope int63.
-         Import ListNotations.
-         Import Bool.
+     Definition bget (b: board) x y :=
+       b.[y].[x].
 
-         Definition bi (b: board) x y :=
-           b2i (bget b x y).
+     Open Scope int63.
+     Import ListNotations.
+     Import Bool.
 
-         Definition neighbors (b: board) x y :=
-           [bget b (x - 1) (y - 1); bget b (x) (y - 1); bget b (x + 1) (y - 1);
-            bget b (x - 1) (y)    ; bget b (x) (y)    ; bget b (x + 1) (y)    ;
-            bget b (x - 1) (y + 1); bget b (x) (y + 1); bget b (x + 1) (y + 1)].
+     Definition bi (b: board) x y :=
+       b2i (bget b x y).
 
-         Definition live_neighbors (b: board) x y :=
-           bi b (x - 1) (y - 1) + bi b (x) (y - 1) + bi b (x + 1) (y - 1) +
-           bi b (x - 1) (y)     +                    bi b (x + 1) (y)     +
-           bi b (x - 1) (y + 1) + bi b (x) (y + 1) + bi b (x + 1) (y + 1).
+     Definition neighbors (b: board) x y :=
+       [bget b (x - 1) (y - 1); bget b (x) (y - 1); bget b (x + 1) (y - 1);
+        bget b (x - 1) (y)    ; bget b (x) (y)    ; bget b (x + 1) (y)    ;
+        bget b (x - 1) (y + 1); bget b (x) (y + 1); bget b (x + 1) (y + 1)].
 
-           (* List.fold_left *)
-           (*   (fun acc (x: bool) => if x then (acc + 1) else acc) *)
-           (*   (neighbors b x y) 0 *)
+     Definition live_neighbors (b: board) x y :=
+       bi b (x - 1) (y - 1) + bi b (x) (y - 1) + bi b (x + 1) (y - 1) +
+       bi b (x - 1) (y)     +                    bi b (x + 1) (y)     +
+       bi b (x - 1) (y + 1) + bi b (x) (y + 1) + bi b (x + 1) (y + 1).
 
-         Definition step_one (b: board) x y :=
-           let live := live_neighbors b x y in
-           if bget b x y then
-             orb (live == 2) (live == 3)
-           else
-             (live == 3).
+       (* List.fold_left *)
+       (*   (fun acc (x: bool) => if x then (acc + 1) else acc) *)
+       (*   (neighbors b x y) 0 *)
 
-         Definition iter {B} (n: int) (b: B) (f: int -> B -> B) :=
-           let it :=
-               fix it (fuel: nat) (idx: int) (b: B) {struct fuel} :=
-                 match fuel with
-                 | 0 => b
-                 | S fuel => it fuel (idx - 1)%int63 (f idx b)
+     Definition step_one (b: board) x y :=
+       let live := live_neighbors b x y in
+       if bget b x y then
+         orb (live == 2) (live == 3)
+       else
+         (live == 3).
+
+     Definition iter {B} (n: int) (b: B) (f: int -> B -> B) :=
+       let it :=
+           fix it (fuel: nat) (idx: int) (b: B) {struct fuel} :=
+             match fuel with
+             | 0 => b
+             | S fuel => it fuel (idx - 1)%int63 (f idx b)
+             end
+       in it (nat_of_int n) (n - 1)%int63 b.
+
+     Definition make_board (sz: int) (f: int -> int -> bool) :=
+       iter sz (make sz (make sz false))
+            (fun y board =>
+               set board y
+                   (iter sz (make sz false)
+                         (fun x row =>
+                            set row x (f x y)))).
+
+     Definition init (l: list (list bool)) :=
+       make_board
+         (int_of_nat (List.length l))
+         (fun x y => List.nth_default
+                    false
+                    (List.nth_default [] l (nat_of_int y))
+                    (nat_of_int x)).
+
+     Definition flatten (b: board) :=
+       List.map (fun row => row.(arr_data)) b.(arr_data).
+
+     Definition step (b: board) :=
+       make_board (length b) (step_one b).
+
+     Definition conway_life b :=
+       flatten (step (init b)).
+
+     Module Streams.
+       Import Coq.Lists.Streams.
+
+       CoFixpoint iter {A} (f: A -> A) (init: A) :=
+         Cons init (iter f (f init)).
+
+       Fixpoint take {A} (n: nat) (s: Stream A) : list A :=
+         match n with
+         | 0 => []
+         | S n => match s with
+                 | Cons hd tl => hd :: take n tl
                  end
-           in it (nat_of_int n) (n - 1)%int63 b.
+         end.
+     End Streams.
 
-         Definition make_board (sz: int) (f: int -> int -> bool) :=
-           iter sz (make sz (make sz false))
-                (fun y board =>
-                   set board y
-                       (iter sz (make sz false)
-                             (fun x row =>
-                                set row x (f x y)))).
+     Import Streams.
 
-         Definition init (l: list (list bool)) :=
-           make_board
-             (int_of_nat (List.length l))
-             (fun x y => List.nth_default
-                        false
-                        (List.nth_default [] l (nat_of_int y))
-                        (nat_of_int x)).
+     Notation "0" := false.
+     Notation "1" := true.
 
-         Definition flatten (b: board) :=
-           List.map (fun row => row.(arr_data)) b.(arr_data).
+.. container:: coq-life
 
-         Definition step (b: board) :=
-           make_board (length b) (step_one b).
+   .. coq::
 
-         Definition conway_life b :=
-           flatten (step (init b)).
+      Definition glider := [[0;1;0;0;0];
+                            [0;0;1;0;0];
+                            [1;1;1;0;0];
+                            [0;0;0;0;0];
+                            [0;0;0;0;0]].
+      Compute take 9 (iter conway_life glider). (* .unfold *)
 
-         Module Streams.
-           Import Coq.Lists.Streams.
+.. coq:: none
 
-           CoFixpoint iter {A} (f: A -> A) (init: A) :=
-             Cons init (iter f (f init)).
+   End GameOfLife. (* .none *)
 
-           Fixpoint take {A} (n: nat) (s: Stream A) : list A :=
-             match n with
-             | 0 => []
-             | S n => match s with
-                     | Cons hd tl => hd :: take n tl
-                     end
-             end.
-         End Streams.
+… or using a graph library to draw visualizations that makes it clearer what happens when one builds a red-black tree with ``Coq.MSets.MSetRBT``.
 
-         Import Streams.
+.. coq:: none
 
-         Notation "0" := false.
-         Notation "1" := true.
+   Require Coq.MSets.MSetRBT
+           Coq.Arith.Arith
+           Coq.Structures.OrderedTypeEx
+           Coq.Structures.OrdersAlt
+           Coq.Lists.List.
 
-    .. container:: coq-life
+   Module RBTExample.
+     Import Coq.MSets.MSetRBT
+            Coq.Arith.Arith
+            Coq.Structures.OrderedTypeEx
+            Coq.Structures.OrdersAlt
+            Coq.Lists.List.
+     Import ListNotations.
 
-       .. coq::
+     Module Nat_as_OT := Update_OT Nat_as_OT.
 
-          Definition glider := [[0;1;0;0;0];
-                                [0;0;1;0;0];
-                                [1;1;1;0;0];
-                                [0;0;0;0;0];
-                                [0;0;0;0;0]].
-          Compute take 9 (iter conway_life glider). (* .unfold *)
+.. coq::
 
-    .. coq:: none
+   Module RBT := MSets.MSetRBT.Make Nat_as_OT.
 
-       End GameOfLife. (* .none *)
+.. coq:: none
 
-  + And finally, let's use a graph library to draw visualizations that makes it clearer what happens when one builds a red-black tree with ``Coq.MSets.MSetRBT``.
+     Module RBTNotations.
+       Notation "'{' ''kind':' ''node'' ; ''color':' ''' color ''' ; ''value':' ''' value ''' ; ''left':' left ; ''right':' right '}'" :=
+         (RBT.Raw.Node color left value right)
+           (format  "'{'  ''kind':' ''node'' ;  ''color':'  ''' color ''' ;  ''value':'  ''' value ''' ;  ''left':'  left ;  ''right':'  right  '}'").
 
-    .. coq:: none
+       Notation "'{' ''kind':' ''leaf'' '}'" :=
+         (RBT.Raw.Leaf).
 
-       Require Coq.MSets.MSetRBT
-               Coq.Arith.Arith
-               Coq.Structures.OrderedTypeEx
-               Coq.Structures.OrdersAlt
-               Coq.Lists.List.
+       Notation "'{' ''tree':' this '}'" :=
+         {| RBT.this := this |}.
+     End RBTNotations.
 
-       Module RBT.
-         Import Coq.MSets.MSetRBT
-                Coq.Arith.Arith
-                Coq.Structures.OrderedTypeEx
-                Coq.Structures.OrdersAlt
-                Coq.Lists.List.
-         Import ListNotations.
+     Notation "v |> f" := (f v) (at level 10, only parsing).
+     Arguments List.rev {A}.
 
-         Module Nat_as_OT := Update_OT Nat_as_OT.
+.. container:: coq-rbt
 
-    .. coq::
+   .. coq::
 
-       Module RBT := MSets.MSetRBT.Make Nat_as_OT.
+      Definition build_trees (leaves: list nat) :=
+        List.fold_left (fun trs n =>
+              RBT.add n (hd RBT.empty trs) :: trs)
+          leaves [] |> List.rev.
 
-    .. coq:: none
+      Module Pretty. (* .none *)
+      Import RBTNotations. (* .none *)
+      Compute build_trees [1;2;3;4;5]. (* .unfold *)
+      Compute build_trees [2;1;4;3;6]. (* .unfold *)
+      End Pretty. (* .none *)
 
-         Module RBTNotations.
-           Notation "'{' ''kind':' ''node'' ; ''color':' ''' color ''' ; ''value':' ''' value ''' ; ''left':' left ; ''right':' right '}'" :=
-             (RBT.Raw.Node color left value right)
-               (format  "'{'  ''kind':' ''node'' ;  ''color':'  ''' color ''' ;  ''value':'  ''' value ''' ;  ''left':'  left ;  ''right':'  right  '}'").
+Do these visualizations really help?  You be the judge: here's how the red-black tree example looks with plain-text output:
 
-           Notation "'{' ''kind':' ''leaf'' '}'" :=
-             (RBT.Raw.Leaf).
+.. container:: coq-rbt-raw
 
-           Notation "'{' ''tree':' this '}'" :=
-             {| RBT.this := this |}.
-         End RBTNotations.
+   .. coq:: none
 
-         Notation "v |> f" := (f v) (at level 10, only parsing).
-         Arguments List.rev {A}.
+      Module Raw. (* .none *)
+      Definition build_trees (leaves: list nat) :=
+        List.fold_left (fun trs n =>
+              RBT.add n (hd RBT.empty trs) :: trs)
+          leaves [] |> List.rev |> (List.map RBT.this).
+      Import RBT.Raw. (* .none *)
 
-    .. container:: coq-rbt
+   .. coq::
 
-       .. coq::
+      Compute build_trees [1;2;3;4;5]. (* .unfold *)
+      Compute build_trees [2;1;4;3;6]. (* .unfold *)
+      End Raw. (* .none *)
 
-          Definition build_trees (leaves: list nat) :=
-            List.fold_left (fun trs n =>
-                  RBT.add n (hd RBT.empty trs) :: trs)
-              leaves [] |> List.rev.
+.. coq:: none
 
-          Module Pretty. (* .none *)
-          Import RBTNotations. (* .none *)
-          Compute build_trees [1;2;3;4;5]. (* .unfold *)
-          Compute build_trees [2;1;4;3;6]. (* .unfold *)
-          End Pretty. (* .none *)
+   End RBTExample.
 
-    Do these visualizations really help?  You be the judge: here's how the red-black tree example looks with plain-text output:
+.. raw:: html
 
-    .. container:: coq-rbt-raw
+   <link rel="stylesheet" href="{static}/static/libs/2020-11-09_alectryon.css">
+   <script src="{static}/static/libs/svg.v3.0.min.js" defer></script>
+   <script src="{static}/static/libs/d3.v5.min.js" defer></script>
+   <script src="{static}/static/libs/dagre-d3.v0.6.4.min.js" defer></script>
+   <script src="{static}/static/libs/2020-11-09_alectryon.js" defer></script>
+   <script type="text/javascript" id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-       .. coq::
+Integrating with docutils
+-------------------------
 
-          Compute build_trees [1;2;3;4;5]. (* .unfold *)
-          Compute build_trees [2;1;4;3;6]. (* .unfold *)
+A ``docutils`` module integrates Alectryon into reStructuredText, making it easy to embed Coq snippets in reStructuredText documents.  This is how this blog is written, and you can easily `download the sources <https://github.com/mit-plv/blog/blob/master/content/2020-11-09_alectryon.rst>`__.  This is also how I made my `SLE2020 slides <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ (press ``p`` to see the presenter notes).
 
-    .. coq:: none
+Improving Coq's syntax-highlighting
+-----------------------------------
 
-       End RBT.
+A ``pygments`` module implements syntax-highlighting for Coq, using a database of keywords and commands extracted from the manual (Ultimately, this part should be merged upstream, and the database-generation tool should be merged into the Coq reference manual; I'll write a separate blog post about it at some point).
 
-    .. raw:: html
+Caching responses
+-----------------
 
-       <link rel="stylesheet" href="{static}/static/libs/2020-11-09_alectryon.css">
-       <script src="{static}/static/libs/svg.v3.0.min.js" defer></script>
-       <script src="{static}/static/libs/d3.v5.min.js" defer></script>
-       <script src="{static}/static/libs/dagre-d3.v0.6.4.min.js" defer></script>
-       <script src="{static}/static/libs/2020-11-09_alectryon.js" defer></script>
-       <script type="text/javascript" id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+A ``json`` module serializes Coq's messages and responses to disk.  This is useful for caching results between runs, but also as a way to implement regression testing on documents including Coq contents.  This helps keeps code and text in sync, as it quickly catches Coq changes that affect a document: without this, when a tactic or command changes, Coq documents that include copy-pasted output will show outdated goals and messages, and Coq documents that use automatically-generated output will display goals and messages that do not match the surrounding prose.  This is a real and common problem, and in fact we have implemented workarounds in the reference manual to catch the most egregious cases (where changes caused snippets to print errors instead of executing successfully).
 
-- A ``docutils`` module integrates Alectryon into reStructuredText, making it easy to embed Coq snippets in reStructuredText documents.  This is how this blog is written, and you can easily `download the sources <https://github.com/mit-plv/blog/blob/master/content/2020-11-09_alectryon.rst>`__.  This is also how I made my `SLE2020 slides <https://cpitclaudel.github.io/alectryon-sle2020-talk/>`__ (press ``p`` to see the presenter notes).
+Editing literate Coq documents
+------------------------------
 
-- A ``pygments`` module implements syntax-highlighting for Coq, using a database of keywords and commands extracted from the manual (Ultimately, this part should be merged upstream, and the database-generation tool should be merged into the Coq reference manual; I'll write a separate blog post about it at some point).
+A ``literate`` module implements translations from Coq to reStructuredText and from reStructuredText to Coq.  From Coq to reST it recognizes special `(*| … |*)` comments and turns them into reStructuredText, and from reST to Coq it wraps all text except ``.. coq::`` blocks into special comments, adjusting indentation as needed.  Concretely, Alectryon knows how to convert between this:
 
-- A ``json`` module serializes Coq's messages and responses to disk.  This is useful for caching results between runs, but also as a way to implement regression testing on documents including Coq contents.  This helps keeps code and text in sync, as it quickly catches Coq changes that affect a document: without this, when a tactic or command changes, Coq documents that include copy-pasted output will show outdated goals and messages, and Coq documents that use automatically-generated output will display goals and messages that do not match the surrounding prose.  This is a real and common problem, and in fact we have implemented workarounds in the reference manual to catch the most egregious cases (where changes caused snippets to print errors instead of executing successfully).
+.. code-block:: rst
 
-- A ``literate`` module implements translations from Coq to reStructuredText and from reStructuredText to Coq.  From Coq to reST it recognizes special `(*| … |*)` comments and turns them into reStructuredText, and from reST to Coq it wraps all text except ``.. coq::`` blocks into special comments, adjusting indentation as needed.  Concretely, Alectryon knows how to convert between this:
+   =============================
+    Writing decision procedures
+   =============================
 
-  .. code-block:: rst
+   Here's an inductive type:
 
-     =============================
-      Writing decision procedures
-     =============================
+   .. coq::
 
-     Here's an inductive type:
+      Inductive Even : nat -> Prop :=
+      | EvenO : Even O
+      | EvenS : forall n, Even n -> Even (S (S n)).
 
-     .. coq::
+   .. note::
 
-        Inductive Even : nat -> Prop :=
-        | EvenO : Even O
-        | EvenS : forall n, Even n -> Even (S (S n)).
+      It has two constructors:
 
-     .. note::
+      .. coq:: unfold out
 
-        It has two constructors:
+         Check EvenO.
+         Check EvenS.
 
-        .. coq:: unfold out
+… and this:
 
-           Check EvenO.
-           Check EvenS.
+.. code-block:: coq
 
-  … and this:
+   (*|
+   =============================
+    Writing decision procedures
+   =============================
 
-  .. code-block:: coq
+   Here's an inductive type:
+   |*)
 
-     (*|
-     =============================
-      Writing decision procedures
-     =============================
+   Inductive Even : nat -> Prop :=
+   | EvenO : Even O
+   | EvenS : forall n, Even n -> Even (S (S n)).
 
-     Here's an inductive type:
-     |*)
+   (*|
+   .. note::
 
-     Inductive Even : nat -> Prop :=
-     | EvenO : Even O
-     | EvenS : forall n, Even n -> Even (S (S n)).
+      It has two constructors:
+   |*)
 
-     (*|
-     .. note::
+   Check EvenO.
+   Check EvenS.
 
-        It has two constructors:
-     |*)
+Because the transformations are (essentially) inverses of each other, you don't have to pick one of these two styles and stick to it (or worse, to maintain two copies of the same document, copy-pasting snippets back and forth).  Instead, you can freely switch between using your favorite Coq IDE to write code and proofs while editing bits of prose within comments, and using your favorite reStructuredText editor to write prose.
 
-     Check EvenO.
-     Check EvenS.
+A small Emacs package (``alectryon.el``), allows you to toggle quickly between these two views.  The screenshot below demonstrates this feature: on the left is the Coq view of an edited excerpt of *Software Foundations*, in ``coq-mode``; on the right is the reST view of the same excerpt, in a ``rst-mode`` buffer.  The conversion is transparent, so editing either view updates the same ``.v`` file on disk.  Notice the highlight indicating a reStructuredText warning on both sides:
 
-  Because the transformations are (essentially) inverses of each other, you don't have to pick one of these two styles and stick to it (or worse, to maintain two copies of the same document, copy-pasting snippets back and forth).  Instead, you can freely switch between using your favorite Coq IDE to write code and proofs while editing bits of prose within comments, and using your favorite reStructuredText editor to write prose.
+.. image:: {static}/static/images/alectryon_emacs-mode-screenshot.svg
+   :alt: Side-by-side comparisons of Coq and reStructuredText views of the same document
 
-- Finally, a small Emacs package (``alectryon.el``), allows you to toggle quickly between these two views.  The screenshot below demonstrates this feature: on the left is the Coq view of an edited excerpt of *Software Foundations*, in ``coq-mode``; on the right is the reST view of the same excerpt, in a ``rst-mode`` buffer.  The conversion is transparent, so editing either view updates the same ``.v`` file on disk.  Notice the highlight indicating a reStructuredText warning on both sides:
+----
 
-  .. image:: {static}/static/images/alectryon_emacs-mode-screenshot.svg
-     :alt: Side-by-side comparisons of Coq and reStructuredText views of the same document
-
-All these features are exposed through a command line interface, documented in `Alectryon's README <https://github.com/cpitclaudel/alectryon/>`_.  This project has been in development for over a year, but there's still lots of rough bits, so expect bugs and please `report them <https://github.com/cpitclaudel/alectryon/issues/>`_!
+All these features are exposed through a command line interface documented in `Alectryon's README <https://github.com/cpitclaudel/alectryon/>`_.  This project has been in development for over a year, but there's still lots of rough bits, so expect bugs and please `report them <https://github.com/cpitclaudel/alectryon/issues/>`_!
 
 Using Alectryon
 ===============

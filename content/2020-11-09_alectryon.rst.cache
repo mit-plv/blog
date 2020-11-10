@@ -14,12 +14,13 @@
     "Require Coq.Numbers.Cyclic.Int63.Int63.\nRequire Coq.Lists.List.\nRequire Coq.Lists.Streams.\n\nModule GameOfLife.\n  Import Int63.\n\n  Module Type Array.\n    Axiom array: Type -> Type.\n\n    Parameter make : forall A, int -> A -> array A.\n    Arguments make {_} _ _.\n\n    Parameter get : forall A, array A -> int -> A.\n    Arguments get {_} _ _.\n\n    Parameter default : forall A, array A -> A.\n    Arguments default {_} _.\n\n    Parameter set : forall A, array A -> int -> A -> array A.\n    Arguments set {_} _ _ _.\n\n    Parameter length : forall A, array A -> int.\n    Arguments length {_} _.\n\n    Parameter copy : forall A, array A -> array A.\n    Arguments copy {_} _.\n\n    Declare Scope array_scope.\n    Delimit Scope array_scope with array.\n    Notation \"t .[ i ]\" :=\n      (get t i)\n        (at level 2, left associativity, format \"t .[ i ]\").\n    Notation \"t .[ i <- a ]\" :=\n      (set t i a)\n        (at level 2, left associativity, format \"t .[ i <- a ]\").\n\n    (* Local Open Scope int63_scope. *)\n    (* Axiom get_set_same : forall A t i (a:A), (i < length t) = true -> t.[i<-a].[i] = a. *)\n    (* Axiom get_set_other : forall A t i j (a:A), i <> j -> t.[i<-a].[j] = t.[j]. *)\n  End Array.\n\n  Import Coq.Lists.List.\n\n  Module ListArray <: Array.\n    Import ListNotations.\n\n    Record _array {A: Type} :=\n      { arr_data: list A;\n        arr_default: A }.\n    Arguments _array : clear implicits.\n    Definition array := _array.\n\n    Definition nat_of_int i := BinInt.Z.to_nat (Int63.to_Z i).\n    Definition int_of_nat n := Int63.of_Z (BinInt.Z.of_nat n).\n\n    Definition make {A: Type} (l: int) (a: A) : array A :=\n      let mk :=\n          fix mk (l: nat) {struct l} :=\n            match l with\n            | 0 => []\n            | S l => a :: mk l\n            end in\n      {| arr_data := mk (nat_of_int l);\n         arr_default := a |}.\n\n    Local Open Scope int63_scope.\n\n    Definition length {A} (x: array A) :=\n      int_of_nat (List.length x.(arr_data)).\n\n    Definition get {A} (x: array A) (i: int) :=\n      let get :=\n          fix get (l: list A) (i: int) {struct l} :=\n            match l with\n            | [] => x.(arr_default)\n            | hd :: tl =>\n              if i == 0 then hd else get tl (i - 1)\n            end in\n      get x.(arr_data) i.\n\n    Definition default {A} (x: array A) :=\n      x.(arr_default).\n\n    Definition set {A} (x: array A) (i: int) (a: A) : array A :=\n      let set :=\n          fix set (i: int) (l: list A) {struct l} :=\n            match l with\n            | [] => []\n            | hd :: tl =>\n              if i == 0 then a :: tl else hd :: set (i - 1) tl\n            end in\n      {| arr_data := set i x.(arr_data);\n         arr_default := x.(arr_default) |}.\n\n    Definition copy {A} (x: array A) : array A := x.\n\n    Declare Scope array_scope.\n    Delimit Scope array_scope with array.\n    Notation \"t .[ i ]\" :=\n      (get t i)\n        (at level 2, left associativity, format \"t .[ i ]\").\n    Notation \"t .[ i <- a ]\" :=\n      (set t i a)\n        (at level 2, left associativity, format \"t .[ i <- a ]\").\n  End ListArray.\n\n  Import ListArray.\n\n  Definition board := array (array bool).\n\n  Definition bget (b: board) x y :=\n    b.[y].[x].\n\n  Open Scope int63.\n  Import ListNotations.\n  Import Bool.\n\n  Definition bi (b: board) x y :=\n    b2i (bget b x y).\n\n  Definition neighbors (b: board) x y :=\n    [bget b (x - 1) (y - 1); bget b (x) (y - 1); bget b (x + 1) (y - 1);\n     bget b (x - 1) (y)    ; bget b (x) (y)    ; bget b (x + 1) (y)    ;\n     bget b (x - 1) (y + 1); bget b (x) (y + 1); bget b (x + 1) (y + 1)].\n\n  Definition live_neighbors (b: board) x y :=\n    bi b (x - 1) (y - 1) + bi b (x) (y - 1) + bi b (x + 1) (y - 1) +\n    bi b (x - 1) (y)     +                    bi b (x + 1) (y)     +\n    bi b (x - 1) (y + 1) + bi b (x) (y + 1) + bi b (x + 1) (y + 1).\n\n    (* List.fold_left *)\n    (*   (fun acc (x: bool) => if x then (acc + 1) else acc) *)\n    (*   (neighbors b x y) 0 *)\n\n  Definition step_one (b: board) x y :=\n    let live := live_neighbors b x y in\n    if bget b x y then\n      orb (live == 2) (live == 3)\n    else\n      (live == 3).\n\n  Definition iter {B} (n: int) (b: B) (f: int -> B -> B) :=\n    let it :=\n        fix it (fuel: nat) (idx: int) (b: B) {struct fuel} :=\n          match fuel with\n          | 0 => b\n          | S fuel => it fuel (idx - 1)%int63 (f idx b)\n          end\n    in it (nat_of_int n) (n - 1)%int63 b.\n\n  Definition make_board (sz: int) (f: int -> int -> bool) :=\n    iter sz (make sz (make sz false))\n         (fun y board =>\n            set board y\n                (iter sz (make sz false)\n                      (fun x row =>\n                         set row x (f x y)))).\n\n  Definition init (l: list (list bool)) :=\n    make_board\n      (int_of_nat (List.length l))\n      (fun x y => List.nth_default\n                 false\n                 (List.nth_default [] l (nat_of_int y))\n                 (nat_of_int x)).\n\n  Definition flatten (b: board) :=\n    List.map (fun row => row.(arr_data)) b.(arr_data).\n\n  Definition step (b: board) :=\n    make_board (length b) (step_one b).\n\n  Definition conway_life b :=\n    flatten (step (init b)).\n\n  Module Streams.\n    Import Coq.Lists.Streams.\n\n    CoFixpoint iter {A} (f: A -> A) (init: A) :=\n      Cons init (iter f (f init)).\n\n    Fixpoint take {A} (n: nat) (s: Stream A) : list A :=\n      match n with\n      | 0 => []\n      | S n => match s with\n              | Cons hd tl => hd :: take n tl\n              end\n      end.\n  End Streams.\n\n  Import Streams.\n\n  Notation \"0\" := false.\n  Notation \"1\" := true.",
     "Definition glider := [[0;1;0;0;0];\n                      [0;0;1;0;0];\n                      [1;1;1;0;0];\n                      [0;0;0;0;0];\n                      [0;0;0;0;0]].\nCompute take 9 (iter conway_life glider). (* .unfold *)",
     "End GameOfLife. (* .none *)",
-    "Require Coq.MSets.MSetRBT\n        Coq.Arith.Arith\n        Coq.Structures.OrderedTypeEx\n        Coq.Structures.OrdersAlt\n        Coq.Lists.List.\n\nModule RBT.\n  Import Coq.MSets.MSetRBT\n         Coq.Arith.Arith\n         Coq.Structures.OrderedTypeEx\n         Coq.Structures.OrdersAlt\n         Coq.Lists.List.\n  Import ListNotations.\n\n  Module Nat_as_OT := Update_OT Nat_as_OT.",
+    "Require Coq.MSets.MSetRBT\n        Coq.Arith.Arith\n        Coq.Structures.OrderedTypeEx\n        Coq.Structures.OrdersAlt\n        Coq.Lists.List.\n\nModule RBTExample.\n  Import Coq.MSets.MSetRBT\n         Coq.Arith.Arith\n         Coq.Structures.OrderedTypeEx\n         Coq.Structures.OrdersAlt\n         Coq.Lists.List.\n  Import ListNotations.\n\n  Module Nat_as_OT := Update_OT Nat_as_OT.",
     "Module RBT := MSets.MSetRBT.Make Nat_as_OT.",
     "  Module RBTNotations.\n    Notation \"'{' ''kind':' ''node'' ; ''color':' ''' color ''' ; ''value':' ''' value ''' ; ''left':' left ; ''right':' right '}'\" :=\n      (RBT.Raw.Node color left value right)\n        (format  \"'{'  ''kind':' ''node'' ;  ''color':'  ''' color ''' ;  ''value':'  ''' value ''' ;  ''left':'  left ;  ''right':'  right  '}'\").\n\n    Notation \"'{' ''kind':' ''leaf'' '}'\" :=\n      (RBT.Raw.Leaf).\n\n    Notation \"'{' ''tree':' this '}'\" :=\n      {| RBT.this := this |}.\n  End RBTNotations.\n\n  Notation \"v |> f\" := (f v) (at level 10, only parsing).\n  Arguments List.rev {A}.",
     "Definition build_trees (leaves: list nat) :=\n  List.fold_left (fun trs n =>\n        RBT.add n (hd RBT.empty trs) :: trs)\n    leaves [] |> List.rev.\n\nModule Pretty. (* .none *)\nImport RBTNotations. (* .none *)\nCompute build_trees [1;2;3;4;5]. (* .unfold *)\nCompute build_trees [2;1;4;3;6]. (* .unfold *)\nEnd Pretty. (* .none *)",
-    "Compute build_trees [1;2;3;4;5]. (* .unfold *)\nCompute build_trees [2;1;4;3;6]. (* .unfold *)",
-    "End RBT.",
+    "Module Raw. (* .none *)\nDefinition build_trees (leaves: list nat) :=\n  List.fold_left (fun trs n =>\n        RBT.add n (hd RBT.empty trs) :: trs)\n    leaves [] |> List.rev |> (List.map RBT.this).\nImport RBT.Raw. (* .none *)",
+    "Compute build_trees [1;2;3;4;5]. (* .unfold *)\nCompute build_trees [2;1;4;3;6]. (* .unfold *)\nEnd Raw. (* .none *)",
+    "End RBTExample.",
     "Inductive Even : nat -> Prop :=\n| EvenO : Even O\n| EvenS : forall n, Even n -> Even (S (S n)).\n\nFixpoint even (n : nat) : bool :=\n  match n with\n  | 0 => true\n  | 1 => false | S (S n) => even n\n  end.\n\nLemma even_Even : forall n, even n = true -> Even n.\n  fix IHn 1.\n  destruct n as [ | [ | ] ].\n  all: simpl.\n  all: intros.\n\n  - (* Base case: 0 *)\n    constructor.\n\n  - (* Base case: 1 *)\n    discriminate.\n\n  - (* Inductive case: [S (S _)] *)\n    constructor.\n    auto.\nQed.",
     "Lemma some_not_none : forall {A: Type} (a: A),\n          Some a = None -> False.\n  progress intros.\n  change (match Some a with\n          | Some _ => False\n          | None => True\n          end).\n  set (Some _) as s in *.\n  clearbody s.\n  match goal with\n  | [ H: ?x = _ |- context[?x] ] => rewrite H\n  end.\n  first [exact I].\n  Show Proof.\nDefined.\n\nEval compute in some_not_none.",
     "Require Import Coq.Arith.Arith.",
@@ -2593,7 +2594,7 @@
       },
       {
         "_type": "sentence",
-        "contents": "Module RBT.",
+        "contents": "Module RBTExample.",
         "messages": [],
         "goals": []
       },
@@ -2783,11 +2784,43 @@
     [
       {
         "_type": "sentence",
+        "contents": "Module Raw.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Definition build_trees (leaves: list nat) :=\n  List.fold_left (fun trs n =>\n        RBT.add n (hd RBT.empty trs) :: trs)\n    leaves [] |> List.rev |> (List.map RBT.this).",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": "\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "Import RBT.Raw.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
+      }
+    ],
+    [
+      {
+        "_type": "sentence",
         "contents": "Compute build_trees [1;2;3;4;5].",
         "messages": [
           {
             "_type": "message",
-            "contents": "     = [{|\n        RBT.this := RBT.Raw.Node Black RBT.Raw.Leaf 1\n                      RBT.Raw.Leaf;\n        RBT.is_ok := RBT.Raw.add_ok RBT.Raw.Leaf 1 |};\n       {|\n       RBT.this := RBT.Raw.Node Black RBT.Raw.Leaf 1\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 2\n                        RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black RBT.Raw.Leaf\n                         1 RBT.Raw.Leaf) 2 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        1 RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        3 RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black RBT.Raw.Leaf\n                         1\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 2\n                            RBT.Raw.Leaf)) 3 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        1 RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        3\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           4 RBT.Raw.Leaf));\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 3\n                            RBT.Raw.Leaf)) 4 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        1 RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Red\n                        (RBT.Raw.Node Black\n                           RBT.Raw.Leaf 3 RBT.Raw.Leaf)\n                        4\n                        (RBT.Raw.Node Black\n                           RBT.Raw.Leaf 5 RBT.Raw.Leaf));\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 3\n                            (RBT.Raw.Node Red\n                               RBT.Raw.Leaf 4\n                               RBT.Raw.Leaf))) 5 |}]\n     : list RBT.t"
+            "contents": "     = [Node Black Leaf 1 Leaf;\n       Node Black Leaf 1 (Node Red Leaf 2 Leaf);\n       Node Black (Node Black Leaf 1 Leaf) 2\n         (Node Black Leaf 3 Leaf);\n       Node Black (Node Black Leaf 1 Leaf) 2\n         (Node Black Leaf 3 (Node Red Leaf 4 Leaf));\n       Node Black (Node Black Leaf 1 Leaf) 2\n         (Node Red (Node Black Leaf 3 Leaf) 4\n            (Node Black Leaf 5 Leaf))]\n     : list t"
           }
         ],
         "goals": []
@@ -2802,20 +2835,30 @@
         "messages": [
           {
             "_type": "message",
-            "contents": "     = [{|\n        RBT.this := RBT.Raw.Node Black RBT.Raw.Leaf 2\n                      RBT.Raw.Leaf;\n        RBT.is_ok := RBT.Raw.add_ok RBT.Raw.Leaf 2 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 1\n                        RBT.Raw.Leaf) 2 RBT.Raw.Leaf;\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black RBT.Raw.Leaf\n                         2 RBT.Raw.Leaf) 1 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 1\n                        RBT.Raw.Leaf) 2\n                     (RBT.Raw.Node Red RBT.Raw.Leaf 4\n                        RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         RBT.Raw.Leaf) 4 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           1 RBT.Raw.Leaf) 2\n                        RBT.Raw.Leaf) 3\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        4 RBT.Raw.Leaf);\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 1\n                            RBT.Raw.Leaf) 2\n                         (RBT.Raw.Node Red\n                            RBT.Raw.Leaf 4\n                            RBT.Raw.Leaf)) 3 |};\n       {|\n       RBT.this := RBT.Raw.Node Black\n                     (RBT.Raw.Node Black\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           1 RBT.Raw.Leaf) 2\n                        RBT.Raw.Leaf) 3\n                     (RBT.Raw.Node Black RBT.Raw.Leaf\n                        4\n                        (RBT.Raw.Node Red RBT.Raw.Leaf\n                           6 RBT.Raw.Leaf));\n       RBT.is_ok := RBT.Raw.add_ok\n                      (RBT.Raw.Node Black\n                         (RBT.Raw.Node Black\n                            (RBT.Raw.Node Red\n                               RBT.Raw.Leaf 1\n                               RBT.Raw.Leaf) 2\n                            RBT.Raw.Leaf) 3\n                         (RBT.Raw.Node Black\n                            RBT.Raw.Leaf 4\n                            RBT.Raw.Leaf)) 6 |}]\n     : list RBT.t"
+            "contents": "     = [Node Black Leaf 2 Leaf;\n       Node Black (Node Red Leaf 1 Leaf) 2 Leaf;\n       Node Black (Node Red Leaf 1 Leaf) 2\n         (Node Red Leaf 4 Leaf);\n       Node Black\n         (Node Black (Node Red Leaf 1 Leaf) 2 Leaf) 3\n         (Node Black Leaf 4 Leaf);\n       Node Black\n         (Node Black (Node Red Leaf 1 Leaf) 2 Leaf) 3\n         (Node Black Leaf 4 (Node Red Leaf 6 Leaf))]\n     : list t"
           }
         ],
         "goals": []
       },
       {
         "_type": "text",
-        "contents": " (* .unfold *)"
+        "contents": " (* .unfold *)\n"
+      },
+      {
+        "_type": "sentence",
+        "contents": "End Raw.",
+        "messages": [],
+        "goals": []
+      },
+      {
+        "_type": "text",
+        "contents": " (* .none *)"
       }
     ],
     [
       {
         "_type": "sentence",
-        "contents": "End RBT.",
+        "contents": "End RBTExample.",
         "messages": [],
         "goals": []
       }

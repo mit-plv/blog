@@ -144,7 +144,7 @@ function rbt() {
 
 function life() {
     function draw(data) {
-        const INNER_SIZE = 40;
+        const INNER_SIZE = 45;
         const EDGE_WIDTH = 1;
 
         const BLOCK_COUNT = data.length;
