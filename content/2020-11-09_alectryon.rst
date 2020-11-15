@@ -6,7 +6,6 @@
 :category: Tools
 :authors: Clément Pit-Claudel
 :summary: An introduction to Alectryon
-:status: draft
 
 .. preview::
 
